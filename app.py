@@ -52,6 +52,12 @@ def health():
     """Health check endpoint"""
     return jsonify({'status': 'healthy', 'service': 'wespa-api'}), 200
 
+@app.route('/')
+@limiter.exempt
+def index():
+    """Root endpoint - health check"""
+    return jsonify({'status': 'healthy', 'service': 'wespa-api', 'endpoints': ['/health', '/player/<int:player_id>', '/players', '/headtohead']}), 200
+
 @app.errorhandler(429)
 def ratelimit_handler(e):
     """Handle rate limit exceeded"""
