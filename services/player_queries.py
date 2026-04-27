@@ -72,7 +72,12 @@ def get_tournament_history(player_id: int, limit: int = 20) -> List[TournamentRe
             tr.start_rating as rating,
             (tr.end_rating - tr.start_rating) as ratingchange,
             COALESCE(tr.spread, 0) as points,
-            0 as averagepoints
+            (SELECT COALESCE(AVG(pr.score), 0)
+             FROM games g
+             JOIN player_results pr ON g.id = pr.game_id
+                 AND pr.player_id = tr.player_id
+                 AND pr.score > 0
+             WHERE g.division_id = tr.division_id) as averagepoints
         FROM tournament_results tr
         JOIN divisions d ON tr.division_id = d.id
         WHERE tr.player_id = %s
