@@ -84,7 +84,9 @@ def get_players():
     
     # Case 3: Get all players (ID only)
     elif idsonly:
-        players = get_all_players_idsonly(200)
+        offset = request.args.get('offset', type=int)
+        limit = request.args.get('limit', type=int)
+        players = get_all_players_idsonly(limit=limit, offset=offset)
         return jsonify(players)
     
     # No valid parameters

@@ -125,11 +125,29 @@ def get_players_batch(player_ids: List[int]) -> List[Dict[str, Any]]:
     """
     return execute_query(query, player_ids)
 
-def get_all_players_idsonly(limit: int = 200) -> List[Dict[str, Any]]:
-    """Get all players (ID and name only)"""
-    query = """
-        SELECT id as playerid, name
-        FROM players
-        LIMIT %s
-    """
-    return execute_query(query, (limit,))
+def get_all_players_idsonly(limit: int = None, offset: int = None) -> List[Dict[str, Any]]:
+    """Get all players (ID and name only), optionally with pagination"""
+    if limit is not None:
+        if offset is not None:
+            query = """
+                SELECT id as playerid, name
+                FROM players
+                ORDER BY id
+                LIMIT %s OFFSET %s
+            """
+            return execute_query(query, (limit, offset))
+        else:
+            query = """
+                SELECT id as playerid, name
+                FROM players
+                ORDER BY id
+                LIMIT %s
+            """
+            return execute_query(query, (limit,))
+    else:
+        query = """
+            SELECT id as playerid, name
+            FROM players
+            ORDER BY id
+        """
+        return execute_query(query)
