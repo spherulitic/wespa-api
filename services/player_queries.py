@@ -58,7 +58,7 @@ def get_player_ranking(player_id: int) -> Optional[int]:
 def get_tournament_history(player_id: int, limit: int = 20) -> List[TournamentResult]:
     """Get recent tournament results for a player"""
     query = """
-        SELECT 
+        SELECT
             tr.id as tourneyid,
             tr.tournament_name as name,
             tr.date,
@@ -71,18 +71,8 @@ def get_tournament_history(player_id: int, limit: int = 20) -> List[TournamentRe
              WHERE tr2.division_id = tr.division_id) as totalplayers,
             tr.start_rating as rating,
             (tr.end_rating - tr.start_rating) as ratingchange,
-            COALESCE((SELECT SUM(pr.score)
-               FROM games g
-               JOIN player_results pr ON g.id = pr.game_id
-                   AND pr.player_id = tr.player_id
-                   AND pr.score > 0
-               WHERE g.division_id = tr.division_id), 0) as points,
-            COALESCE((SELECT AVG(pr.score)
-               FROM games g
-               JOIN player_results pr ON g.id = pr.game_id
-                   AND pr.player_id = tr.player_id
-                   AND pr.score > 0
-               WHERE g.division_id = tr.division_id), 0) as averagepoints
+            COALESCE(tr.spread, 0) as points,
+            0 as averagepoints
         FROM tournament_results tr
         JOIN divisions d ON tr.division_id = d.id
         WHERE tr.player_id = %s

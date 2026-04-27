@@ -77,4 +77,5 @@ def get_player():
     
     except Exception as e:
         logger.error(f"Error fetching player {player_id}: {e}")
-        return jsonify({}), 200
+        raise
+#        return jsonify({}), 200
