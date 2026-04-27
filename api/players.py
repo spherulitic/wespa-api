@@ -42,15 +42,15 @@ def build_basic_player_response(player_data):
 @bp.route('/players.php')
 def get_players():
     """Handle multiple players endpoint with various parameters"""
-    playerlist = request.args.get('playerlist')
+    p = request.args.get('p')
     search = request.args.get('search')
     idsonly = request.args.get('idsonly') == '1'
     
     # Case 1: Get players by ID list (batch)
-    if playerlist:
-        # Parse comma-separated IDs, limit to 50
+    if p:
+        # Parse space-separated IDs (XT format: ?p=6003+17589), limit to 50
         try:
-            ids = [int(x.strip()) for x in playerlist.split(',') if x.strip()]
+            ids = [int(x.strip()) for x in p.replace('+', ' ').split() if x.strip()]
             if len(ids) > 50:
                 ids = ids[:50]
             
@@ -61,10 +61,10 @@ def get_players():
                 players_data = get_players_batch(ids)
                 players = [build_basic_player_response(p) for p in players_data]
             
-            return jsonify(players)
+            return jsonify({'players': players})
         
         except ValueError:
-            return jsonify([]), 200
+            return jsonify({'players': []}), 200
     
     # Case 2: Search by name
     elif search:
@@ -72,7 +72,7 @@ def get_players():
             # Return only IDs and names
             results = search_players(search)
             idsonly_results = [{'playerid': r['playerid'], 'name': r['name']} for r in results]
-            return jsonify(idsonly_results)
+            return jsonify({'players': idsonly_results})
         else:
             # Return full player data
             results = search_players(search)
@@ -80,14 +80,14 @@ def get_players():
             for r in results:
                 player_data = build_basic_player_response(r)
                 players.append(player_data)
-            return jsonify(players)
+            return jsonify({'players': players})
     
     # Case 3: Get all players (ID only)
     elif idsonly:
         offset = request.args.get('offset', type=int)
         limit = request.args.get('limit', type=int)
         players = get_all_players_idsonly(limit=limit, offset=offset)
-        return jsonify(players)
+        return jsonify({'players': players})
     
     # No valid parameters
     return jsonify([]), 200
