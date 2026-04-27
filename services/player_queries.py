@@ -67,21 +67,14 @@ def get_tournament_history(player_id: int, limit: int = 20) -> List[TournamentRe
             tr.losses,
             tr.byes as ties,
             tr.position as place,
-            COUNT(DISTINCT tr2.player_id) as totalplayers,
+            (SELECT COUNT(*) FROM tournament_results tr2 WHERE tr2.division_id = tr.division_id AND tr2.tournament_id = tr.tournament_id) as totalplayers,
             tr.start_rating as rating,
             (tr.end_rating - tr.start_rating) as ratingchange,
-            COALESCE(SUM(pr.score), 0) as points,
-            COALESCE(AVG(pr.score), 0) as averagepoints
+            COALESCE((SELECT SUM(pr.score) FROM games g JOIN player_results pr ON g.id = pr.game_id AND pr.player_id = tr.player_id AND pr.score > 0 WHERE g.division_id = tr.division_id AND g.tournament_id = tr.tournament_id), 0) as points,
+            COALESCE((SELECT AVG(pr.score) FROM games g JOIN player_results pr ON g.id = pr.game_id AND pr.player_id = tr.player_id AND pr.score > 0 WHERE g.division_id = tr.division_id AND g.tournament_id = tr.tournament_id), 0) as averagepoints
         FROM tournament_results tr
         JOIN divisions d ON tr.division_id = d.id
-        LEFT JOIN tournament_results tr2 ON tr.division_id = tr2.division_id
-        LEFT JOIN games g ON tr.division_id = g.division_id
-        LEFT JOIN player_results pr ON g.id = pr.game_id 
-            AND pr.player_id = tr.player_id
-            AND pr.score > 0
         WHERE tr.player_id = %s
-        GROUP BY tr.id, tr.date, tr.tournament_name, d.name, 
-                 tr.wins, tr.losses, tr.byes, tr.position, tr.start_rating, tr.end_rating
         ORDER BY tr.date DESC
         LIMIT %s
     """
