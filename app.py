@@ -40,10 +40,11 @@ limiter = Limiter(
 )
 
 # Register blueprints
-from api import player, players, headtohead
+from api import player, players, headtohead, player_v2
 app.register_blueprint(player.bp)
 app.register_blueprint(players.bp)
 app.register_blueprint(headtohead.bp)
+app.register_blueprint(player_v2.bp)
 
 @app.route('/health')
 @cache.cached(timeout=60)
