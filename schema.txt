@@ -1,0 +1,162 @@
+
+First, here is the database schema we will pull data from:
+
+mysql> show tables;
++--------------------+
+| Tables_in_wespa    |
++--------------------+
+| divisions          |
+| events             |
+| games              |
+| lexicons           |
+| loaded_tournaments |
+| player_alt_names   |
+| player_results     |
+| players            |
+| tournament_results |
+| tournaments        |
++--------------------+
+10 rows in set (0.00 sec)
+
+mysql> describe divisions
+    -> ;
++---------------+--------------+------+-----+---------+----------------+
+| Field         | Type         | Null | Key | Default | Extra          |
++---------------+--------------+------+-----+---------+----------------+
+| id            | int          | NO   | PRI | NULL    | auto_increment |
+| tournament_id | int          | NO   | MUL | NULL    |                |
+| name          | varchar(255) | YES  |     | NULL    |                |
+| length        | int          | YES  |     | NULL    |                |
+| number        | int          | YES  |     | NULL    |                |
++---------------+--------------+------+-----+---------+----------------+
+5 rows in set (0.04 sec)
+
+mysql> describe events;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | int          | NO   | PRI | NULL    | auto_increment |
+| start_date | date         | YES  |     | NULL    |                |
+| end_date   | date         | YES  |     | NULL    |                |
+| link       | varchar(255) | YES  |     | NULL    |                |
+| sponsor    | varchar(255) | YES  |     | NULL    |                |
+| country    | varchar(3)   | YES  |     | NULL    |                |
+| location   | varchar(255) | YES  |     | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+7 rows in set (0.01 sec)
+
+mysql> describe games;
++--------------+--------------+------+-----+---------+----------------+
+| Field        | Type         | Null | Key | Default | Extra          |
++--------------+--------------+------+-----+---------+----------------+
+| id           | int          | NO   | PRI | NULL    | auto_increment |
+| division_id  | int          | NO   | MUL | NULL    |                |
+| round        | int          | YES  |     | NULL    |                |
+| lexicon_id   | int          | NO   | MUL | NULL    |                |
+| gcg_filename | varchar(255) | YES  |     | NULL    |                |
++--------------+--------------+------+-----+---------+----------------+
+5 rows in set (0.01 sec)
+
+mysql> describe lexicons;
++-------+--------------+------+-----+---------+----------------+
+| Field | Type         | Null | Key | Default | Extra          |
++-------+--------------+------+-----+---------+----------------+
+| id    | int          | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(255) | YES  |     | NULL    |                |
++-------+--------------+------+-----+---------+----------------+
+2 rows in set (0.00 sec)
+
+mysql> describe loaded_tournaments;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| id       | int          | NO   | PRI | NULL    | auto_increment |
+| name     | varchar(255) | YES  |     | NULL    |                |
+| filename | varchar(255) | YES  |     | NULL    |                |
++----------+--------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+
+mysql> describe player_alt_names;
++-----------+--------------+------+-----+---------+----------------+
+| Field     | Type         | Null | Key | Default | Extra          |
++-----------+--------------+------+-----+---------+----------------+
+| id        | int          | NO   | PRI | NULL    | auto_increment |
+| alt_name  | varchar(255) | YES  |     | NULL    |                |
+| player_id | int          | NO   | MUL | NULL    |                |
++-----------+--------------+------+-----+---------+----------------+
+3 rows in set (0.01 sec)
+
+mysql> describe player_results;
++-----------+------+------+-----+---------+----------------+
+| Field     | Type | Null | Key | Default | Extra          |
++-----------+------+------+-----+---------+----------------+
+| id        | int  | NO   | PRI | NULL    | auto_increment |
+| player_id | int  | NO   | MUL | NULL    |                |
+| game_id   | int  | NO   | MUL | NULL    |                |
+| score     | int  | YES  |     | NULL    |                |
+| result    | int  | YES  |     | NULL    |                |
++-----------+------+------+-----+---------+----------------+
+5 rows in set (0.01 sec)
+
+mysql> describe players;
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| id          | int          | NO   | PRI | NULL    | auto_increment |
+| name        | varchar(255) | YES  |     | NULL    |                |
+| country     | varchar(3)   | YES  |     | NULL    |                |
+| photo       | varchar(255) | YES  |     | NULL    |                |
+| suspended   | tinyint(1)   | YES  |     | NULL    |                |
+| deceased    | tinyint(1)   | YES  |     | NULL    |                |
+| current     | tinyint(1)   | YES  |     | NULL    |                |
+| provisional | tinyint(1)   | YES  |     | NULL    |                |
+| total_games | int          | YES  |     | NULL    |                |
+| last_played | date         | YES  |     | NULL    |                |
+| rating      | int          | YES  |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+11 rows in set (0.01 sec)
+
+mysql> describe tournament_results;
++-------------------+--------------+------+-----+---------+----------------+
+| Field             | Type         | Null | Key | Default | Extra          |
++-------------------+--------------+------+-----+---------+----------------+
+| id                | int          | NO   | PRI | NULL    | auto_increment |
+| division_id       | int          | NO   | MUL | NULL    |                |
+| player_id         | int          | NO   | MUL | NULL    |                |
+| player_name       | varchar(255) | YES  |     | NULL    |                |
+| position          | int          | YES  |     | NULL    |                |
+| wins              | float        | YES  |     | NULL    |                |
+| losses            | float        | YES  |     | NULL    |                |
+| byes              | int          | YES  |     | NULL    |                |
+| spread            | int          | YES  |     | NULL    |                |
+| prize_money       | int          | YES  |     | NULL    |                |
+| prize_currency    | varchar(255) | YES  |     | NULL    |                |
+| prize_ech_rate    | varchar(255) | YES  |     | NULL    |                |
+| start_rating      | int          | YES  |     | NULL    |                |
+| end_rating        | int          | YES  |     | NULL    |                |
+| date              | date         | YES  |     | NULL    |                |
+| tournament_name   | varchar(255) | YES  |     | NULL    |                |
+| expected_wins     | float        | YES  |     | NULL    |                |
+| old_world_rank    | int          | YES  |     | NULL    |                |
+| new_world_rank    | int          | YES  |     | NULL    |                |
+| old_national_rank | int          | YES  |     | NULL    |                |
+| new_national_rank | int          | YES  |     | NULL    |                |
+| old_rating_dev    | int          | YES  |     | NULL    |                |
+| new_rating_dev    | int          | YES  |     | NULL    |                |
++-------------------+--------------+------+-----+---------+----------------+
+23 rows in set (0.00 sec)
+
+mysql> describe tournaments;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | int          | NO   | PRI | NULL    | auto_increment |
+| event_id   | int          | NO   | MUL | NULL    |                |
+| td         | varchar(255) | YES  |     | NULL    |                |
+| start_date | date         | YES  |     | NULL    |                |
+| end_date   | date         | YES  |     | NULL    |                |
+| name       | varchar(255) | YES  |     | NULL    |                |
+| country    | varchar(3)   | YES  |     | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+7 rows in set (0.00 sec)
+
