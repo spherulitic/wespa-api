@@ -200,7 +200,7 @@ def get_tournament_list_v2(player_id: int) -> List[Dict[str, Any]]:
     """Get tournament history for a player (v2 format)."""
     query = """
         SELECT
-            tr.id as tourneyid,
+            t.id as tourneyid,
             tr.tournament_name as name,
             tr.date,
             d.name as division,
@@ -215,6 +215,7 @@ def get_tournament_list_v2(player_id: int) -> List[Dict[str, Any]]:
             tr.new_rating_dev as end_deviation
         FROM tournament_results tr
         JOIN divisions d ON tr.division_id = d.id
+        JOIN tournaments t ON d.tournament_id = t.id
         WHERE tr.player_id = %s
         ORDER BY tr.date DESC
     """
