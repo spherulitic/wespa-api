@@ -296,3 +296,197 @@ class PlayerResponseV2:
             'stats': self.stats.to_dict() if self.stats else None,
             'tournaments': [t.to_dict() for t in self.tournaments],
         }
+
+
+# ---------------------------------------------------------------------------
+# Tournament v2 schemas
+# ---------------------------------------------------------------------------
+
+class DivisionStandingV2:
+    """A single player's standing within a division."""
+
+    def __init__(self, data: Dict[str, Any]):
+        self.place = data.get('place')
+        self.playerid = data.get('playerid')
+        self.name = data.get('name')
+        self.country = data.get('country')
+        self.wins = data.get('wins')
+        self.losses = data.get('losses')
+        self.byes = data.get('byes', 0)
+        self.spread = data.get('spread', 0)
+        self.startRating = data.get('start_rating')
+        self.endRating = data.get('end_rating')
+        self.ratingChange = data.get('rating_change')
+        self.startDeviation = data.get('start_deviation')
+        self.endDeviation = data.get('end_deviation')
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'place': self.place,
+            'playerid': self.playerid,
+            'name': self.name,
+            'country': self.country,
+            'wins': int(self.wins) if self.wins is not None else 0,
+            'losses': int(self.losses) if self.losses is not None else 0,
+            'byes': int(self.byes) if self.byes is not None else 0,
+            'spread': int(self.spread) if self.spread is not None else 0,
+            'startRating': self.startRating,
+            'endRating': self.endRating,
+            'ratingChange': self.ratingChange,
+            'startDeviation': self.startDeviation,
+            'endDeviation': self.endDeviation,
+        }
+
+
+class DivisionV2:
+    """A division within a tournament, with standings."""
+
+    def __init__(self, data: Dict[str, Any]):
+        self.division = data.get('division')
+        self.name = data.get('name')
+        self.standings: List[DivisionStandingV2] = []
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'division': self.division,
+            'name': self.name,
+            'standings': [s.to_dict() for s in self.standings],
+        }
+
+
+class TournamentResponseV2:
+    """Top-level v2 tournament response."""
+
+    def __init__(self, data: Dict[str, Any]):
+        self.tourneyid = data.get('tourneyid')
+        self.name = data.get('name')
+        self.date = data.get('date')
+        self.location = data.get('location')
+        self.divisions: List[DivisionV2] = []
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'tourneyid': self.tourneyid,
+            'name': self.name,
+            'date': self.date.strftime('%Y-%m-%d') if self.date else None,
+            'location': self.location,
+            'divisions': [d.to_dict() for d in self.divisions],
+        }
+
+
+# ---------------------------------------------------------------------------
+# Division stats v2 schemas
+# ---------------------------------------------------------------------------
+
+class DivisionStatEntry:
+    """A single ranked entry in a division stats category."""
+
+    def __init__(self, data: Dict[str, Any]):
+        self.rank = data.get('rank')
+        self.player_id = data.get('player_id')
+        self.player_name = data.get('player_name')
+        # Most categories have these
+        self.score = data.get('score')
+        self.opponent_id = data.get('opponent_id')
+        self.opponent_name = data.get('opponent_name')
+        self.round = data.get('round')
+        # highSpread only
+        self.opponent_score = data.get('opponent_score')
+        self.spread = data.get('spread')
+        # highCombined only
+        self.player1_id = data.get('player1_id')
+        self.player1_name = data.get('player1_name')
+        self.player2_id = data.get('player2_id')
+        self.player2_name = data.get('player2_name')
+        self.total_score = data.get('total_score')
+        # upsets only
+        self.player_rating = data.get('player_rating')
+        self.opponent_rating = data.get('opponent_rating')
+        self.difference = data.get('difference')
+
+    def to_dict(self) -> Dict[str, Any]:
+        d: Dict[str, Any] = {}
+        for key in ('rank', 'player_id', 'player_name', 'score',
+                     'opponent_id', 'opponent_name', 'round',
+                     'opponent_score', 'spread',
+                     'player1_id', 'player1_name',
+                     'player2_id', 'player2_name', 'total_score',
+                     'player_rating', 'opponent_rating', 'difference'):
+            val = getattr(self, key, None)
+            if val is not None:
+                d[key] = val
+        return d
+
+
+class DivisionStatsResponse:
+    """All stats for a division: highWin, highLoss, highSpread, highCombined, upsets."""
+
+    def __init__(self):
+        self.highWin: List[DivisionStatEntry] = []
+        self.highLoss: List[DivisionStatEntry] = []
+        self.highSpread: List[DivisionStatEntry] = []
+        self.highCombined: List[DivisionStatEntry] = []
+        self.upsets: List[DivisionStatEntry] = []
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'highWin': [e.to_dict() for e in self.highWin],
+            'highLoss': [e.to_dict() for e in self.highLoss],
+            'highSpread': [e.to_dict() for e in self.highSpread],
+            'highCombined': [e.to_dict() for e in self.highCombined],
+            'upsets': [e.to_dict() for e in self.upsets],
+        }
+
+
+# ---------------------------------------------------------------------------
+# Division ratings v2 schemas
+# ---------------------------------------------------------------------------
+
+class DivisionRatingEntry:
+    """Player rating info within a division."""
+
+    def __init__(self, data: Dict[str, Any]):
+        self.playerid = data.get('playerid')
+        self.name = data.get('name')
+        self.country = data.get('country')
+        self.expectedWins = data.get('expected_wins')
+        self.actualWins = data.get('actual_wins')
+        self.oldWorldRank = data.get('old_world_rank')
+        self.newWorldRank = data.get('new_world_rank')
+        self.oldNationRank = data.get('old_nation_rank')
+        self.newNationRank = data.get('new_nation_rank')
+        self.startRating = data.get('start_rating')
+        self.endRating = data.get('end_rating')
+        self.ratingChange = data.get('rating_change')
+        self.startDeviation = data.get('start_deviation')
+        self.endDeviation = data.get('end_deviation')
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'playerid': self.playerid,
+            'name': self.name,
+            'country': self.country,
+            'expectedWins': float(self.expectedWins) if self.expectedWins is not None else None,
+            'actualWins': self.actualWins,
+            'oldWorldRank': self.oldWorldRank,
+            'newWorldRank': self.newWorldRank,
+            'oldNationRank': self.oldNationRank,
+            'newNationRank': self.newNationRank,
+            'startRating': self.startRating,
+            'endRating': self.endRating,
+            'ratingChange': self.ratingChange,
+            'startDeviation': self.startDeviation,
+            'endDeviation': self.endDeviation,
+        }
+
+
+class DivisionRatingsResponse:
+    """All player rating info for a division."""
+
+    def __init__(self):
+        self.ratings: List[DivisionRatingEntry] = []
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'ratings': [r.to_dict() for r in self.ratings],
+        }
