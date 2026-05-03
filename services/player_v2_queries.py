@@ -229,23 +229,26 @@ def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, 
     player_rating_at_time, plus tournament-level fields.
     """
     # First get tournament-level info
+    # tourney_id here is tournaments.id, not tournament_results.id
     t_info = execute_query_one(
         """
         SELECT
-            tr.id as tourney_id,
+            tr.id as tr_id,
             tr.tournament_name,
             tr.date as tournament_date,
             tr.start_rating,
             d.name as division_name
         FROM tournament_results tr
         JOIN divisions d ON tr.division_id = d.id
-        WHERE tr.player_id = %s AND tr.id = %s
+        JOIN tournaments t ON d.tournament_id = t.id
+        WHERE tr.player_id = %s AND t.id = %s
         """,
         (player_id, tourney_id),
     )
     if not t_info:
         return []
 
+    tr_id = t_info['tr_id']
     player_start_rating = t_info['start_rating']
 
     query = """
@@ -266,15 +269,13 @@ def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, 
         FROM player_results pr
         JOIN games g ON pr.game_id = g.id
         JOIN divisions d ON g.division_id = d.id
-        JOIN tournament_results tr
-            ON tr.player_id = pr.player_id
-           AND tr.division_id = d.id
+        JOIN tournaments t ON d.tournament_id = t.id
         JOIN player_results opp_pr
             ON opp_pr.game_id = g.id
            AND opp_pr.player_id != pr.player_id
         JOIN players opp_p ON opp_pr.player_id = opp_p.id
         WHERE pr.player_id = %s
-          AND tr.id = %s
+          AND t.id = %s
         ORDER BY g.round ASC
     """
     rows = execute_query(query, (player_id, tourney_id))
