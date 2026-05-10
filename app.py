@@ -49,6 +49,9 @@ app.register_blueprint(tournament_v2.bp)
 app.register_blueprint(division_v2.bp)
 app.register_blueprint(tournament_search.bp)
 
+from api import rankings_v2
+app.register_blueprint(rankings_v2.bp)
+
 @app.route('/health')
 @cache.cached(timeout=60)
 @limiter.exempt
