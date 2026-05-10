@@ -30,11 +30,14 @@ def get_rankings_page(
         match = execute_query_one(match_query, (pattern, pattern))
 
         if match and match.get('rating') is not None:
-            # Count how many players have a higher rating
+            # Count how many active players have a higher rating
             count_query = """
                 SELECT COUNT(*) AS higher
                 FROM players
-                WHERE rating > %s AND rating IS NOT NULL
+                WHERE rating > %s
+                  AND rating IS NOT NULL
+                  AND COALESCE(total_games, 0) >= 50
+                  AND last_played >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
             """
             count_result = execute_query_one(count_query, (match['rating'],))
             higher = count_result['higher'] if count_result else 0
@@ -45,14 +48,17 @@ def get_rankings_page(
 
     offset = (page - 1) * per_page
 
-    # Get total count of rated players
+    # Get total count of active rated players
     total_result = execute_query_one(
-        "SELECT COUNT(*) AS cnt FROM players WHERE rating IS NOT NULL"
+        """SELECT COUNT(*) AS cnt FROM players
+            WHERE rating IS NOT NULL
+              AND COALESCE(total_games, 0) >= 50
+              AND last_played >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)"""
     )
     total = total_result['cnt'] if total_result else 0
     total_pages = max(1, (total + per_page - 1) // per_page)
 
-    # Fetch the page of players
+    # Fetch the page of active players
     query = """
         SELECT
             p.id AS playerid,
@@ -63,6 +69,8 @@ def get_rankings_page(
             p.last_played
         FROM players p
         WHERE p.rating IS NOT NULL
+          AND COALESCE(p.total_games, 0) >= 50
+          AND p.last_played >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
         ORDER BY p.rating DESC
         LIMIT %s OFFSET %s
     """
