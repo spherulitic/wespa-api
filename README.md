@@ -1,1 +1,232 @@
-IyBXRVNQQSBTY3JhYmJsZSBBUEkKCkZsYXNrLWJhc2VkIEFQSSBmb3IgU2NyYWJibGUgdG91cm5hbWVudCBkYXRhLCBjb21wYXRpYmxlIHdpdGggY3Jvc3MtdGFibGVzLmNvbSBBUEkgZm9ybWF0LgoKIyMgRW5kcG9pbnRzCgojIyMgdjEgKExlZ2FjeSDigJQgbWFpbnRhaW5lZCBmb3IgZXhpc3RpbmcgY2xpZW50cykKCkFsbCB2MSBlbmRwb2ludHMgdXNlIGAucGhwYCBleHRlbnNpb24gcGF0aHMgZm9yIGNyb3NzLXRhYmxlcyBjb21wYXRpYmlsaXR5LgoKfCBNZXRob2QgfCBFbmRwb2ludCB8IERlc2NyaXB0aW9uIHwKfC0tLS0tLS0tfC0tLS0tLS0tLS18LS0tLS0tLS0tLS0tLXwKfCBHRVQgfCBgL3BsYXllci5waHA/cGxheWVyPXtpZH1gIHwgR2V0IGJhc2ljIHBsYXllciBpbmZvIHwKfCBHRVQgfCBgL3BsYXllci5waHA/cGxheWVyPXtpZH0mcmVzdWx0cz0xYCB8IFBsYXllciBpbmZvIHdpdGggdG91cm5hbWVudCBoaXN0b3J5IHwKfCBHRVQgfCBgL3BsYXllcnMucGhwP3A9e2lkMX0re2lkMn0rLi4uYCB8IEdldCBtdWx0aXBsZSBwbGF5ZXJzIGJ5IElEIChtYXggNTApIHwKfCBHRVQgfCBgL3BsYXllcnMucGhwP3NlYXJjaD17bmFtZX1gIHwgU2VhcmNoIHBsYXllcnMgYnkgbmFtZSB8CnwgR0VUIHwgYC9wbGF5ZXJzLnBocD9pZHNvbmx5PTFgIHwgR2V0IGFsbCBwbGF5ZXIgSURzIGFuZCBuYW1lcyB8CnwgR0VUIHwgYC9wbGF5ZXJzLnBocD9zZWFyY2g9e25hbWV9Jmlkc29ubHk9MWAgfCBTZWFyY2ggcGxheWVycyAoSURzIG9ubHkpIHwKfCBHRVQgfCBgL2hlYWR0b2hlYWQucGhwP3BsYXllcnM9e2lkMX0re2lkMn0rLi4uYCB8IEhlYWQtdG8taGVhZCBnYW1lcyBiZXR3ZWVuIHBsYXllcnMgfAp8IEdFVCB8IGAvaGVhbHRoYCB8IEhlYWx0aCBjaGVjayB8CgojIyMgdjIgKENsZWFuIHBhdGhzIHdpdGggZW5oYW5jZWQgZGF0YSkKCk5ldyBlbmRwb2ludHMgd2l0aCBkZXRhaWxlZCBwbGF5ZXIgc3RhdGlzdGljcywgcGVyLXJvdW5kIHRvdXJuYW1lbnQgYnJlYWtkb3ducywgYW5kIHJhbmtpbmdzLgoKIyMjIyBQbGF5ZXIgUHJvZmlsZQoKYGBgCkdFVCAvdjIvcGxheWVyL3twbGF5ZXJfaWR9CmBgYAoKUmV0dXJucyBhIHBsYXllcidzIHByb2ZpbGUsIGRldGFpbGVkIGNhcmVlciBzdGF0aXN0aWNzLCBhbmQgdG91cm5hbWVudCBoaXN0b3J5LgoKKipSZXNwb25zZSBzaGFwZToqKgoKYGBganNvbgp7CiAgInBsYXllcmlkIjogMzAzOSwKICAibmFtZSI6ICJaYWNoYXJ5IERhbmciLAogICJjb3VudHJ5IjogIlVTQSIsCiAgImNzd3JhdGluZyI6IDE3NjQsCiAgInBob3RvdXJsIjogImh0dHBzOi8vbGVnYWN5Lndlc3BhLm9yZy9hYXJkdmFyay9pY29ucy96YWNoYXJ5ZGFuZy5qcGciLAogICJzdGF0cyI6IHsKICAgICJnYW1lc1BsYXllZCI6IDY4LAogICAgIndpbnMiOiAzMywKICAgICJsb3NzZXMiOiAzNCwKICAgICJkcmF3cyI6IDEsCiAgICAiYnllcyI6IDAsCiAgICAid2luUGVyY2VudGFnZSI6IDQ4LjUzLAogICAgImF2ZXJhZ2VTY29yZSI6IDQyMy4yMiwKICAgICJhdmVyYWdlQWdhaW5zdCI6IDQxNC45MCwKICAgICJoaWdoR2FtZSI6IDU4OCwKICAgICJoaWdoR2FtZU9wcG9uZW50IjogIklhbiBDb3ZlbnRyeSIsCiAgICAibG93R2FtZSI6IDI5MSwKICAgICJsb3dHYW1lT3Bwb25lbnQiOiAiV2ludGVyIiwKICAgICJiaWdnZXN0V2luIjogMjg3LAogICAgImJpZ2dlc3RXaW5PcHBvbmVudCI6ICJHYXJ5IE9saXZlciIsCiAgICAiaGlnaExvc3MiOiA0NTgsCiAgICAiaGlnaExvc3NPcHBvbmVudCI6ICJWaWN0b3JpYSBLaW5naGFtIiwKICAgICJsb3dXaW4iOiAzNzMsCiAgICAibG93V2luT3Bwb25lbnQiOiAiV2ludGVyIiwKICAgICJnYW1lc1VuZGVyMzAwIjogMiwKICAgICJnYW1lczMwMHRvMzk5IjogMjMsCiAgICAiZ2FtZXM0MDB0bzQ5OSI6IDMzLAogICAgImdhbWVzNTAwdG81OTkiOiAxMCwKICAgICJnYW1lczYwMHBsdXMiOiAwCiAgfSwKICAidG91cm5hbWVudHMiOiBbCiAgICB7CiAgICAgICJ0b3VybmV5aWQiOiA1MjU0MCwKICAgICAgIm5hbWUiOiAiVUsgT3BlbiAtIEZpbmFsIEZsaW5nIiwKICAgICAgImRhdGUiOiAiMjAyNi0wMS0xMCIsCiAgICAgICJkaXZpc2lvbiI6ICJBIiwKICAgICAgIndpbnMiOiA2LAogICAgICAibG9zc2VzIjogOSwKICAgICAgImRyYXdzIjogMCwKICAgICAgInNwcmVhZCI6IC0yNzQsCiAgICAgICJwbGFjZSI6IDE1LAogICAgICAiZW5kUmF0aW5nIjogMTY5MSwKICAgICAgInJhdGluZ0NoYW5nZSI6IC03MywKICAgICAgInN0YXJ0RGV2aWF0aW9uIjogNjcsCiAgICAgICJlbmREZXZpYXRpb24iOiA0MgogICAgfQogIF0KfQpgYGAKCiMjIyMgVG91cm5hbWVudCBSb3VuZCBEZXRhaWxzCgpgYGAKR0VUIC92Mi9wbGF5ZXIve3BsYXllcl9pZH0vdG91cm5hbWVudHMve3RvdXJuZXlfaWR9CmBgYAoKUmV0dXJucyBwZXItcm91bmQgcmVzdWx0cyBmb3IgYSBwbGF5ZXIgYXQgYSBzcGVjaWZpYyB0b3VybmFtZW50LgoKKipSZXNwb25zZSBzaGFwZToqKgoKYGBganNvbgp7CiAgInBsYXllcmlkIjogMzAzOSwKICAidG91cm5leWlkIjogNTI1NDAsCiAgIm5hbWUiOiAiVUsgT3BlbiAtIEZpbmFsIEZsaW5nIiwKICAiZGF0ZSI6ICIyMDI2LTAxLTEwIiwKICAiZGl2aXNpb24iOiAiQSIsCiAgInJvdW5kcyI6IFsKICAgIHsKICAgICAgInJvdW5kIjogMSwKICAgICAgIm9wcG9uZW50X25hbWUiOiAiTnVhbGEgTydSb3Vya2UiLAogICAgICAib3Bwb25lbnRfaWQiOiA2MSwKICAgICAgIm9wcG9uZW50X3JhdGluZyI6IDE3MDQsCiAgICAgICJyZXN1bHQiOiAiTCIsCiAgICAgICJzY29yZV9mb3IiOiAzNjAsCiAgICAgICJzY29yZV9hZ2FpbnN0IjogMzg4LAogICAgICAicGxheWVyX3JhdGluZ19hdF90aW1lIjogMTc2NAogICAgfQogIF0KfQpgYGAKCi0gYGNzd3JhdGluZ2AgaXMgdGhlIHBsYXllcidzIGBlbmRfcmF0aW5nYCBmcm9tIHRoZWlyIG1vc3QgcmVjZW50IHRvdXJuYW1lbnQsIG9yIGZhbGxzIGJhY2sgdG8gdGhlIGBwbGF5ZXJzLnJhdGluZ2AgY29sdW1uIGlmIG5vIHRvdXJuYW1lbnRzIGV4aXN0LgotIGBlbmRSYXRpbmdgIC8gYHJhdGluZ0NoYW5nZWAgLyBgc3RhcnREZXZpYXRpb25gIC8gYGVuZERldmlhdGlvbmAgaW4gZWFjaCB0b3VybmFtZW50IGVudHJ5IHJlZmxlY3QgdGhlIHJhdGluZyBhbmQgcmF0aW5nIGRldmlhdGlvbiBhdCB0aGUgZW5kIG9mIHRoYXQgdG91cm5hbWVudC4KLSBSZXN1bHQgdmFsdWVzOiBgV2AgKHdpbiksIGBMYCAobG9zcyksIGBEYCAoZHJhdyksIGBCYCAoYnllKS4KCiMjIyMgUmFua2luZ3MKCmBgYApHRVQgL3YyL3JhbmtpbmdzP3BhZ2U9MSZwZXJfcGFnZT01MCZzZWFyY2g9CmBgYAoKUmV0dXJucyBhIHBhZ2luYXRlZCBsaXN0IG9mIGFjdGl2ZSBwbGF5ZXJzIHNvcnRlZCBieSByYXRpbmcgZGVzY2VuZGluZy4KCioqUXVlcnkgcGFyYW1ldGVyczoqKgoKfCBQYXJhbWV0ZXIgfCBUeXBlIHwgRGVmYXVsdCB8IERlc2NyaXB0aW9uIHwKfC0tLS0tLS0tLS0tfC0tLS0tLXwtLS0tLS0tLS18LS0tLS0tLS0tLS0tLXwKfCBgcGFnZWAgfCBpbnQgfCAxIHwgUGFnZSBudW1iZXIgKDEtYmFzZWQpIHwKfCBgcGVyX3BhZ2VgIHwgaW50IHwgNTAgfCBQbGF5ZXJzIHBlciBwYWdlIChtYXggMTAwKSB8CnwgYHNlYXJjaGAgfCBzdHJpbmcgfCAob3B0aW9uYWwpIHwgUGxheWVyIG5hbWUgdG8ganVtcCB0byB0aGVpciBwYWdlIHwKCioqUmVzcG9uc2Ugc2hhcGU6KioKCmBgYGpzb24KewogICJwYWdlIjogMSwKICAicGVyX3BhZ2UiOiA1MCwKICAidG90YWwiOiA5ODcsCiAgInRvdGFsX3BhZ2VzIjogMjAsCiAgInBsYXllcnMiOiBbCiAgICB7CiAgICAgICJyYW5rIjogMSwKICAgICAgInBsYXllcmlkIjogMzAzOSwKICAgICAgIm5hbWUiOiAiWmFjaGFyeSBEYW5nIiwKICAgICAgImNvdW50cnkiOiAiVVNBIiwKICAgICAgInJhdGluZyI6IDE3NjQsCiAgICAgICJ0b3RhbF9nYW1lcyI6IDEyMDAsCiAgICAgICJsYXN0X3BsYXllZCI6ICIyMDI2LTA1LTEwIgogICAgfQogIF0KfQpgYGAKCi0gUmFua2luZ3MgYXJlIGNvbXB1dGVkIHVzaW5nIGVhY2ggcGxheWVyJ3MgbGF0ZXN0IGB0b3VybmFtZW50X3Jlc3VsdHMuZW5kX3JhdGluZ2AsIGZhbGxpbmcgYmFjayB0byBgcGxheWVycy5yYXRpbmdgIGlmIG5vIHRvdXJuYW1lbnQgZXhpc3RzLgotIE9ubHkgcGxheWVycyB3aXRoIGF0IGxlYXN0IDUwIGdhbWVzIGFuZCBhY3Rpdml0eSBpbiB0aGUgbGFzdCAyIHllYXJzIGFyZSBpbmNsdWRlZC4KCiMjIyMgTGF0ZXN0IFRvdXJuYW1lbnQKCmBgYApHRVQgL3YyL3JhbmtpbmdzL2xhdGVzdC10b3VybmFtZW50CmBgYAoKUmV0dXJucyB0aGUgbmFtZSBhbmQgZW5kIGRhdGUgb2YgdGhlIG1vc3QgcmVjZW50IHRvdXJuYW1lbnQuCgoqKlJlc3BvbnNlIHNoYXBlOioqCgpgYGBqc29uCnsKICAibmFtZSI6ICJDYXVzZXdheSBDaGFsbGVuZ2UiLAogICJkYXRlIjogIjIwMjYtMDUtMjUiCn0KYGBgCgojIyBQcm9qZWN0IFN0cnVjdHVyZQoKYGBgCndlc3BhLWFwaS8K4pSc4pSA4pSAIGFwcC5weSAgICAgICAgICAgICAgICAgICAjIEZsYXNrIGFwcGxpY2F0aW9uIGVudHJ5IHBvaW50CuKUnOKUgOKUgCBjb25maWcucHkgICAgICAgICAgICAgICAgIyBDb25maWd1cmF0aW9uIChEQiwgY2FjaGUsIHJhdGUgbGltaXRpbmcpCuKUnOKUgOKUgCBhcGkvCuKUgiAgIOKUnOKUgOKUgCBfX2luaXRfXy5weQrilIIgICDilJzilIDilIAgcGxheWVyLnB5ICAgICAgICAgICAgIyB2MSBwbGF5ZXIgZW5kcG9pbnQgKC9wbGF5ZXIucGhwKQrilIIgICDilJzilIDilIAgcGxheWVycy5weSAgICAgICAgICAgIyB2MSBwbGF5ZXJzIGVuZHBvaW50ICgvcGxheWVycy5waHApCuKUgiAgIOKUnOKUgOKUgCBoZWFkdG9oZWFkLnB5ICAgICAgICAjIHYxIGhlYWQtdG8taGVhZCBlbmRwb2ludCAoL2hlYWR0b2hlYWQucGhwKQrilIIgICDilJzilIDilIAgcGxheWVyX3YyLnB5ICAgICAgICAgIyB2MiBwbGF5ZXIgZW5kcG9pbnRzICgvdjIvcGxheWVyLy4uLikK4pSCICAg4pSc4pSA4pSAIHJhbmtpbmdzX3YyLnB5ICAgICAgICMgdjIgcmFua2luZ3MgZW5kcG9pbnRzICgvdjIvcmFua2luZ3MpCuKUgiAgIOKUnOKUgOKUgCBkaXZpc2lvbl92Mi5weSAgICAgICAjIHYyIGRpdmlzaW9uIGVuZHBvaW50CuKUgiAgIOKUnOKUgOKUgCB0b3VybmFtZW50X3YyLnB5ICAgICAjIHYyIHRvdXJuYW1lbnQgZW5kcG9pbnQK4pSCICAg4pSU4pSA4pSAIHRvdXJuYW1lbnRfc2VhcmNoLnB5ICMgVG91cm5hbWVudCBzZWFyY2ggZW5kcG9pbnQK4pSc4pSA4pSAIHNlcnZpY2VzLwrilIIgICDilJzilIDilIAgX19pbml0X18ucHkK4pSCICAg4pSc4pSA4pSAIGRiLnB5ICAgICAgICAgICAgICAgICMgRGF0YWJhc2UgY29ubmVjdGlvbiBwb29sIGFuZCBoZWxwZXJzCuKUgiAgIOKUnOKUgOKUgCBwbGF5ZXJfcXVlcmllcy5weSAgICAjIHYxIHBsYXllciBkYXRhIHF1ZXJpZXMK4pSCICAg4pSc4pSA4pSAIGhlYWR0b2hlYWRfcXVlcmllcy5weQrilIIgICDilJzilIDilIAgcGxheWVyX3YyX3F1ZXJpZXMucHkgIyB2MiBwbGF5ZXIgc3RhdHMgYW5kIHJvdW5kIHF1ZXJpZXMK4pSCICAg4pSc4pSA4pSAIHJhbmtpbmdzX3F1ZXJpZXMucHkgICMgdjIgcmFua2luZ3MgcXVlcmllcwrilIIgICDilJzilIDilIAgZGl2aXNpb25fdjJfcXVlcmllcy5weSAjIHYyIGRpdmlzaW9uIHF1ZXJpZXMK4pSCICAg4pSc4pSA4pSAIHRvdXJuYW1lbnRfdjJfcXVlcmllcy5weSAjIHYyIHRvdXJuYW1lbnQgcXVlcmllcwrilIIgICDilJTilIDilIAgdG91cm5hbWVudF9zZWFyY2hfcXVlcmllcy5weSAjIFRvdXJuYW1lbnQgc2VhcmNoIHF1ZXJpZXMK4pSc4pSA4pSAIG1vZGVscy8K4pSCICAg4pSc4pSA4pSAIF9faW5pdF9fLnB5CuKUgiAgIOKUlOKUgOKUgCBzY2hlbWFzLnB5ICAgICAgICAgICAjIERhdGEgdHJhbnNmZXIgb2JqZWN0cyAodjEgYW5kIHYyKQrilJTilIDilIAgcmVxdWlyZW1lbnRzLnR4dApgYGAKCiMjIERlcGxveW1lbnQKCiMjIyBFbnZpcm9ubWVudCBWYXJpYWJsZXMKCnwgVmFyaWFibGUgfCBEZXNjcmlwdGlvbiB8IERlZmF1bHQgfAp8LS0tLS0tLS0tLXwtLS0tLS0tLS0tLS0tfC0tLS0tLS0tLXwKfCBgREJfSE9TVGAgfCBEYXRhYmFzZSBob3N0IHwgYGxvY2FsaG9zdGAgfAp8IGBEQl9QT1JUYCB8IERhdGFiYXNlIHBvcnQgfCBgMzMwNmAgfAp8IGBEQl9VU0VSYCB8IERhdGFiYXNlIHVzZXIgfCBgcm9vdGAgfAp8IGBEQl9QQVNTV09SRGAgfCBEYXRhYmFzZSBwYXNzd29yZCB8IChlbXB0eSkgfAp8IGBEQl9OQU1FYCB8IERhdGFiYXNlIG5hbWUgfCBgd2VzcGFgIHwKfCBgUkFURUxJTUlUX0RFRkFVTFRgIHwgQVBJIHJhdGUgbGltaXQgfCBgMTAwIHBlciBtaW51dGVgIHwKCiMjIyBEb2NrZXIgQnVpbGQKCmBgYGJhc2gKZG9ja2VyIGJ1aWxkIC10IHdlc3BhLWFwaSAuCmRvY2tlciBydW4gLXAgODA4MDo4MDgwIC0tZW52LWZpbGUgLmVudiB3ZXNwYS1hcGkKYGBgCg==
+# WESPA Scrabble API
+
+Flask-based API for Scrabble tournament data, compatible with cross-tables.com API format.
+
+## Endpoints
+
+### v1 (Legacy — maintained for existing clients)
+
+All v1 endpoints use `.php` extension paths for cross-tables compatibility.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/player.php?player={id}` | Get basic player info |
+| GET | `/player.php?player={id}&results=1` | Player info with tournament history |
+| GET | `/players.php?p={id1}+{id2}+...` | Get multiple players by ID (max 50) |
+| GET | `/players.php?search={name}` | Search players by name |
+| GET | `/players.php?idsonly=1` | Get all player IDs and names |
+| GET | `/players.php?search={name}&idsonly=1` | Search players (IDs only) |
+| GET | `/headtohead.php?players={id1}+{id2}+...` | Head-to-head games between players |
+| GET | `/health` | Health check |
+
+### v2 (Clean paths with enhanced data)
+
+New endpoints with detailed player statistics, per-round tournament breakdowns, and rankings.
+
+#### Player Profile
+
+```
+GET /v2/player/{player_id}
+```
+
+Returns a player's profile, detailed career statistics, and tournament history.
+
+**Response shape:**
+
+```json
+{
+  "playerid": 3039,
+  "name": "Zachary Dang",
+  "country": "USA",
+  "cswrating": 1764,
+  "photourl": "https://legacy.wespa.org/aardvark/icons/zacharydang.jpg",
+  "stats": {
+    "gamesPlayed": 68,
+    "wins": 33,
+    "losses": 34,
+    "draws": 1,
+    "byes": 0,
+    "winPercentage": 48.53,
+    "averageScore": 423.22,
+    "averageAgainst": 414.90,
+    "highGame": 588,
+    "highGameOpponent": "Ian Coventry",
+    "lowGame": 291,
+    "lowGameOpponent": "Winter",
+    "biggestWin": 287,
+    "biggestWinOpponent": "Gary Oliver",
+    "highLoss": 458,
+    "highLossOpponent": "Victoria Kingham",
+    "lowWin": 373,
+    "lowWinOpponent": "Winter",
+    "gamesUnder300": 2,
+    "games300to399": 23,
+    "games400to499": 33,
+    "games500to599": 10,
+    "games600plus": 0
+  },
+  "tournaments": [
+    {
+      "tourneyid": 52540,
+      "name": "UK Open - Final Fling",
+      "date": "2026-01-10",
+      "division": "A",
+      "wins": 6,
+      "losses": 9,
+      "draws": 0,
+      "spread": -274,
+      "place": 15,
+      "endRating": 1691,
+      "ratingChange": -73,
+      "startDeviation": 67,
+      "endDeviation": 42
+    }
+  ]
+}
+```
+
+#### Tournament Round Details
+
+```
+GET /v2/player/{player_id}/tournaments/{tourney_id}
+```
+
+Returns per-round results for a player at a specific tournament.
+
+**Response shape:**
+
+```json
+{
+  "playerid": 3039,
+  "tourneyid": 52540,
+  "name": "UK Open - Final Fling",
+  "date": "2026-01-10",
+  "division": "A",
+  "rounds": [
+    {
+      "round": 1,
+      "opponent_name": "Nuala O'Rourke",
+      "opponent_id": 61,
+      "opponent_rating": 1704,
+      "result": "L",
+      "score_for": 360,
+      "score_against": 388,
+      "player_rating_at_time": 1764
+    }
+  ]
+}
+```
+
+- `cswrating` is the player's `end_rating` from their most recent tournament, or falls back to the `players.rating` column if no tournaments exist.
+- `endRating` / `ratingChange` / `startDeviation` / `endDeviation` in each tournament entry reflect the rating and rating deviation at the end of that tournament.
+- Result values: `W` (win), `L` (loss), `D` (draw), `B` (bye).
+
+#### Rankings
+
+```
+GET /v2/rankings?page=1&per_page=50&search=
+```
+
+Returns a paginated list of active players sorted by rating descending.
+
+**Query parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `page` | int | 1 | Page number (1-based) |
+| `per_page` | int | 50 | Players per page (max 100) |
+| `search` | string | (optional) | Player name to jump to their page |
+
+**Response shape:**
+
+```json
+{
+  "page": 1,
+  "per_page": 50,
+  "total": 987,
+  "total_pages": 20,
+  "players": [
+    {
+      "rank": 1,
+      "playerid": 3039,
+      "name": "Zachary Dang",
+      "country": "USA",
+      "rating": 1764,
+      "total_games": 1200,
+      "last_played": "2026-05-10"
+    }
+  ]
+}
+```
+
+- Rankings are computed using each player's latest `tournament_results.end_rating`, falling back to `players.rating` if no tournament exists.
+- Only players with at least 50 games and activity in the last 2 years are included.
+
+#### Latest Tournament
+
+```
+GET /v2/rankings/latest-tournament
+```
+
+Returns the name and end date of the most recent tournament.
+
+**Response shape:**
+
+```json
+{
+  "name": "Causeway Challenge",
+  "date": "2026-05-25"
+}
+```
+
+## Project Structure
+
+```
+wespa-api/
+├── app.py                   # Flask application entry point
+├── config.py                # Configuration (DB, cache, rate limiting)
+├── api/
+│   ├── __init__.py
+│   ├── player.py            # v1 player endpoint (/player.php)
+│   ├── players.py           # v1 players endpoint (/players.php)
+│   ├── headtohead.py        # v1 head-to-head endpoint (/headtohead.php)
+│   ├── player_v2.py         # v2 player endpoints (/v2/player/...)
+│   ├── rankings_v2.py       # v2 rankings endpoints (/v2/rankings)
+│   ├── division_v2.py       # v2 division endpoint
+│   ├── tournament_v2.py     # v2 tournament endpoint
+│   └── tournament_search.py # Tournament search endpoint
+├── services/
+│   ├── __init__.py
+│   ├── db.py                # Database connection pool and helpers
+│   ├── player_queries.py    # v1 player data queries
+│   ├── headtohead_queries.py
+│   ├── player_v2_queries.py # v2 player stats and round queries
+│   ├── rankings_queries.py  # v2 rankings queries
+│   ├── division_v2_queries.py # v2 division queries
+│   ├── tournament_v2_queries.py # v2 tournament queries
+│   └── tournament_search_queries.py # Tournament search queries
+├── models/
+│   ├── __init__.py
+│   └── schemas.py           # Data transfer objects (v1 and v2)
+└── requirements.txt
+```
+
+## Deployment
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_HOST` | Database host | `localhost` |
+| `DB_PORT` | Database port | `3306` |
+| `DB_USER` | Database user | `root` |
+| `DB_PASSWORD` | Database password | (empty) |
+| `DB_NAME` | Database name | `wespa` |
+| `RATELIMIT_DEFAULT` | API rate limit | `100 per minute` |
+
+### Docker Build
+
+```bash
+docker build -t wespa-api .
+docker run -p 8080:8080 --env-file .env wespa-api
+```
