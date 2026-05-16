@@ -69,9 +69,14 @@ def get_players():
     # Case 2: Search by name
     elif search:
         if idsonly:
-            # Return only IDs and names
+            # Return only IDs, names, country, and rating
             results = search_players(search)
-            idsonly_results = [{'playerid': r['playerid'], 'name': r['name']} for r in results]
+            idsonly_results = [{
+                'playerid': r['playerid'],
+                'name': r['name'],
+                'country': r.get('country'),
+                'cswrating': int(r['cswrating']) if r.get('cswrating') else None
+            } for r in results]
             return jsonify({'players': idsonly_results})
         else:
             # Return full player data
