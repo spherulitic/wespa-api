@@ -298,9 +298,9 @@ class PlayerResponseV2:
         }
 
 
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 # Tournament v2 schemas
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 
 class DivisionStandingV2:
     """A single player's standing within a division."""
@@ -312,6 +312,7 @@ class DivisionStandingV2:
         self.country = data.get('country')
         self.wins = data.get('wins')
         self.losses = data.get('losses')
+        self.draws = data.get('draws', 0)
         self.byes = data.get('byes', 0)
         self.spread = data.get('spread', 0)
         self.startRating = data.get('start_rating')
@@ -328,6 +329,7 @@ class DivisionStandingV2:
             'country': self.country,
             'wins': int(self.wins) if self.wins is not None else 0,
             'losses': int(self.losses) if self.losses is not None else 0,
+            'draws': int(self.draws) if self.draws is not None else 0,
             'byes': int(self.byes) if self.byes is not None else 0,
             'spread': int(self.spread) if self.spread is not None else 0,
             'startRating': self.startRating,
@@ -374,9 +376,9 @@ class TournamentResponseV2:
         }
 
 
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 # Division stats v2 schemas
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 
 class DivisionStatEntry:
     """A single ranked entry in a division stats category."""
@@ -438,9 +440,9 @@ class DivisionStatsResponse:
         }
 
 
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 # Division ratings v2 schemas
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 
 class DivisionRatingEntry:
     """Player rating info within a division."""
