@@ -52,7 +52,6 @@ def get_standings_for_division(division_id: int) -> List[Dict[str, Any]]:
             p.country,
             tr.wins,
             tr.losses,
-            COALESCE(tr.ties, 0) as draws,
             COALESCE(tr.byes, 0) as byes,
             COALESCE(tr.spread, 0) as spread,
             tr.start_rating,

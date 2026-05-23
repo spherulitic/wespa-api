@@ -312,7 +312,6 @@ class DivisionStandingV2:
         self.country = data.get('country')
         self.wins = data.get('wins')
         self.losses = data.get('losses')
-        self.draws = data.get('draws', 0)
         self.byes = data.get('byes', 0)
         self.spread = data.get('spread', 0)
         self.startRating = data.get('start_rating')
@@ -327,9 +326,8 @@ class DivisionStandingV2:
             'playerid': self.playerid,
             'name': self.name,
             'country': self.country,
-            'wins': int(self.wins) if self.wins is not None else 0,
-            'losses': int(self.losses) if self.losses is not None else 0,
-            'draws': int(self.draws) if self.draws is not None else 0,
+            'wins': float(self.wins) if self.wins is not None else 0,
+            'losses': float(self.losses) if self.losses is not None else 0,
             'byes': int(self.byes) if self.byes is not None else 0,
             'spread': int(self.spread) if self.spread is not None else 0,
             'startRating': self.startRating,
