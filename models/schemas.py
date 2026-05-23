@@ -262,8 +262,8 @@ class TournamentListItemV2:
             'name': self.name,
             'date': self.date.strftime('%Y-%m-%d') if self.date else None,
             'division': self.division,
-            'wins': int(self.wins) if self.wins is not None else 0,
-            'losses': int(self.losses) if self.losses is not None else 0,
+            'wins': float(self.wins) if self.wins is not None else 0,
+            'losses': float(self.losses) if self.losses is not None else 0,
             'draws': int(self.draws) if self.draws is not None else 0,
             'spread': int(self.spread) if self.spread is not None else 0,
             'place': self.place,
@@ -298,9 +298,9 @@ class PlayerResponseV2:
         }
 
 
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 # Tournament v2 schemas
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 
 class DivisionStandingV2:
     """A single player's standing within a division."""
@@ -326,8 +326,8 @@ class DivisionStandingV2:
             'playerid': self.playerid,
             'name': self.name,
             'country': self.country,
-            'wins': int(self.wins) if self.wins is not None else 0,
-            'losses': int(self.losses) if self.losses is not None else 0,
+            'wins': float(self.wins) if self.wins is not None else 0,
+            'losses': float(self.losses) if self.losses is not None else 0,
             'byes': int(self.byes) if self.byes is not None else 0,
             'spread': int(self.spread) if self.spread is not None else 0,
             'startRating': self.startRating,
@@ -374,9 +374,9 @@ class TournamentResponseV2:
         }
 
 
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 # Division stats v2 schemas
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 
 class DivisionStatEntry:
     """A single ranked entry in a division stats category."""
@@ -438,9 +438,9 @@ class DivisionStatsResponse:
         }
 
 
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 # Division ratings v2 schemas
-# ---------------------------------------------------------------------------
+# --------------------------------------------------
 
 class DivisionRatingEntry:
     """Player rating info within a division."""
