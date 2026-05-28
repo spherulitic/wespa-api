@@ -38,6 +38,8 @@ def get_player_v2(player_id: int):
             'country': basic['country'],
             'cswrating': basic['cswrating'],
             'photourl': basic['photourl'],
+            'title': basic.get('title'),
+            'norms': basic.get('norms'),
         })
         response.stats = stats
         response.tournaments = [TournamentListItemV2(r) for r in tournament_rows]

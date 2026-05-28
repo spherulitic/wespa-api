@@ -16,6 +16,8 @@ def get_basic_player_v2(player_id: int) -> Optional[Dict[str, Any]]:
             p.id as playerid,
             p.name,
             p.country,
+            p.title,
+            p.norms,
             COALESCE(
                 (SELECT tr.end_rating FROM tournament_results tr
                  WHERE tr.player_id = p.id AND tr.end_rating IS NOT NULL

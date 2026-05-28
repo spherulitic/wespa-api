@@ -283,6 +283,8 @@ class PlayerResponseV2:
         self.country = data.get('country')
         self.cswrating = data.get('cswrating')
         self.photourl = data.get('photourl')
+        self.title = data.get('title')
+        self.norms = data.get('norms')
         self.stats: Optional[PlayerStatsV2] = None
         self.tournaments: List[TournamentListItemV2] = []
 
@@ -293,6 +295,8 @@ class PlayerResponseV2:
             'country': self.country,
             'cswrating': self.cswrating,
             'photourl': self.photourl,
+            'title': self.title,
+            'norms': self.norms,
             'stats': self.stats.to_dict() if self.stats else None,
             'tournaments': [t.to_dict() for t in self.tournaments],
         }
