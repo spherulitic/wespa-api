@@ -39,6 +39,7 @@ Returns a player's profile, detailed career statistics, and tournament history.
   "name": "Zachary Dang",
   "country": "USA",
   "cswrating": 1764,
+  "norms": "**"
   "photourl": "https://legacy.wespa.org/aardvark/icons/zacharydang.jpg",
   "stats": {
     "gamesPlayed": 68,
@@ -65,6 +66,7 @@ Returns a player's profile, detailed career statistics, and tournament history.
     "games500to599": 10,
     "games600plus": 0
   },
+  "title": "M"
   "tournaments": [
     {
       "tourneyid": 52540,
