@@ -200,6 +200,7 @@ def _get_bye_count(player_id: int) -> int:
 
 def get_tournament_list_v2(player_id: int) -> List[Dict[str, Any]]:
     """Get tournament history for a player (v2 format)."""
+    # Main query — tournament-level data
     query = """
         SELECT
             t.id as tourneyid,
@@ -221,7 +222,41 @@ def get_tournament_list_v2(player_id: int) -> List[Dict[str, Any]]:
         WHERE tr.player_id = %s
         ORDER BY tr.date DESC
     """
-    return execute_query(query, (player_id,))
+    rows = execute_query(query, (player_id,))
+    if not rows:
+        return rows
+
+    # Single aggregation query — average scores for all tournaments at once
+    avg_query = """
+        SELECT
+            d.tournament_id as tourneyid,
+            AVG(pr.score) as average_score,
+            AVG(opp_pr.score) as average_against
+        FROM player_results pr
+        JOIN player_results opp_pr
+            ON opp_pr.game_id = pr.game_id
+           AND opp_pr.player_id != pr.player_id
+        JOIN games g ON pr.game_id = g.id
+        JOIN divisions d ON g.division_id = d.id
+        WHERE pr.player_id = %s
+          AND pr.score > 0
+        GROUP BY d.tournament_id
+    """
+    avg_rows = execute_query(avg_query, (player_id,))
+
+    # Build a lookup dict: tourneyid -> (average_score, average_against)
+    avg_lookup = {
+        r['tourneyid']: (r['average_score'] or 0, r['average_against'] or 0)
+        for r in avg_rows
+    }
+
+    # Merge averages into main results
+    for row in rows:
+        avg_score, avg_against = avg_lookup.get(row['tourneyid'], (0, 0))
+        row['average_score'] = avg_score
+        row['average_against'] = avg_against
+
+    return rows
 
 
 def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, Any]]:

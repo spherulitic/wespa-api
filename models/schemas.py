@@ -255,6 +255,8 @@ class TournamentListItemV2:
         self.ratingChange = data.get('rating_change')
         self.startDeviation = data.get('start_deviation')
         self.endDeviation = data.get('end_deviation')
+        self.averageScore = data.get('average_score', 0)
+        self.averageAgainst = data.get('average_against', 0)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -271,6 +273,8 @@ class TournamentListItemV2:
             'ratingChange': self.ratingChange,
             'startDeviation': self.startDeviation,
             'endDeviation': self.endDeviation,
+            'averageScore': round(float(self.averageScore), 2) if self.averageScore else None,
+            'averageAgainst': round(float(self.averageAgainst), 2) if self.averageAgainst else None,
         }
 
 
