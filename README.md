@@ -181,6 +181,129 @@ Returns the name and end date of the most recent tournament.
 }
 ```
 
+#### Tournament Details
+
+```
+GET /v2/tournament/{tourney_id}
+```
+
+Returns tournament-level info along with all divisions and their full standings.
+
+**Response shape:**
+
+```json
+{
+  "tourneyid": 52540,
+  "name": "UK Open - Final Fling",
+  "date": "2026-01-10",
+  "location": "Birmingham, England",
+  "divisions": [
+    {
+      "division": 1,
+      "name": "Division A",
+      "standings": [
+        {
+          "place": 1,
+          "playerid": 3039,
+          "name": "Zachary Dang",
+          "wins": 12,
+          "losses": 3,
+          "draws": 0,
+          "spread": 1054,
+          "points": 24
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Division Ratings
+
+```
+GET /v2/tournament/{tourney_id}/division/{division_index}/ratings
+```
+
+Returns rating and rank information for all players in a specific division of a tournament.
+
+**Response shape:**
+
+```json
+{
+  "ratings": [
+    {
+      "playerid": 3039,
+      "name": "Zachary Dang",
+      "rating": 1764,
+      "rank": 1
+    }
+  ]
+}
+```
+
+#### Division Stats
+
+```
+GET /v2/tournament/{tourney_id}/division/{division_index}/stats
+```
+
+Returns detailed match statistics for a division, including highest wins, losses, spreads, combined scores, and upsets.
+
+**Response shape:**
+
+```json
+{
+  "highWin": [
+    {
+      "round": 5,
+      "player": "Zachary Dang",
+      "opponent": "Ian Coventry",
+      "score_for": 588,
+      "score_against": 301,
+      "spread": 287
+    }
+  ],
+  "highLoss": [],
+  "highSpread": [],
+  "highCombined": [],
+  "upsets": []
+}
+```
+
+### Tournament Search
+
+```
+GET /tournaments/search?q={name}&country={code}&from={date}&to={date}
+```
+
+Search tournaments by name, country, and/or date range. All parameters are optional, but at least one must be provided.
+
+**Query parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `q` | string | Partial tournament name (case-insensitive) |
+| `country` | string | 3-letter country code (e.g. GBR, USA) |
+| `from` | string | Start date (YYYY-MM-DD) |
+| `to` | string | End date (YYYY-MM-DD) |
+
+**Response shape:**
+
+```json
+{
+  "tournaments": [
+    {
+      "tourneyid": 52540,
+      "name": "UK Open - Final Fling",
+      "start_date": "2026-01-10",
+      "end_date": "2026-01-12",
+      "country": "GBR",
+      "location": "Birmingham"
+    }
+  ]
+}
+```
+
 ## Project Structure
 
 ```
