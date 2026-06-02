@@ -34,129 +34,107 @@ def get_basic_player_v2(player_id: int) -> Optional[Dict[str, Any]]:
 def get_player_stats_v2(player_id: int) -> Optional[Dict[str, Any]]:
     """Compute detailed career stats for a player.
 
-    Returns a dict with all the fields needed for PlayerStatsV2, or
-    None if the player has no results.
+    All aggregation happens in SQL — only the aggregated row and a few
+    focused lookups are transferred from the database.
     """
-    # --- Aggregate stats from player_results, and fetch opponent info ---
-    # strategy: get all non-bye game results, join to find the opponent
-    # result on the same game, then aggregate in Python.
+    # --- Single aggregation query ---
     query = """
         SELECT
-            pr.score,
-            pr.result,
-            g.id as game_id,
-            g.round,
-            opp_pr.score as opp_score,
-            opp_pr.player_id as opp_player_id,
-            opp_p.name as opp_name,
-            opp_p.rating as opp_rating
+            COUNT(*) as total_games,
+            SUM(CASE WHEN pr.result = 1 THEN 1 ELSE 0 END) as wins,
+            SUM(CASE WHEN pr.result = -1 THEN 1 ELSE 0 END) as losses,
+            SUM(CASE WHEN pr.result = 0 AND pr.score > 0 THEN 1 ELSE 0 END) as draws,
+            ROUND(AVG(pr.score), 2) as average_score,
+            ROUND(AVG(opp_pr.score), 2) as average_against,
+            MAX(pr.score) as high_game,
+            MIN(pr.score) as low_game,
+            MAX(CASE WHEN pr.result = 1 THEN pr.score - opp_pr.score ELSE 0 END) as biggest_win_margin,
+            MAX(CASE WHEN pr.result = -1 THEN pr.score ELSE 0 END) as high_loss_score,
+            MIN(CASE WHEN pr.result = 1 THEN pr.score ELSE NULL END) as low_win_score,
+            SUM(CASE WHEN pr.score < 300 THEN 1 ELSE 0 END) as under300,
+            SUM(CASE WHEN pr.score >= 300 AND pr.score < 400 THEN 1 ELSE 0 END) as score300to399,
+            SUM(CASE WHEN pr.score >= 400 AND pr.score < 500 THEN 1 ELSE 0 END) as score400to499,
+            SUM(CASE WHEN pr.score >= 500 AND pr.score < 600 THEN 1 ELSE 0 END) as score500to599,
+            SUM(CASE WHEN pr.score >= 600 THEN 1 ELSE 0 END) as score600plus
         FROM player_results pr
         JOIN games g ON pr.game_id = g.id
         JOIN player_results opp_pr
             ON opp_pr.game_id = g.id
            AND opp_pr.player_id != pr.player_id
-        JOIN players opp_p ON opp_pr.player_id = opp_p.id
         WHERE pr.player_id = %s
           AND pr.score > 0
-        ORDER BY g.id
     """
-    rows = execute_query(query, (player_id,))
-    if not rows:
+    row = execute_query_one(query, (player_id,))
+    if not row or not row['total_games']:
         return None
 
-    # Trackers for aggregations
-    total_games = 0
-    wins = 0
-    losses = 0
-    draws = 0
-    total_score = 0
-    total_against = 0
+    # --- Focused lookups for opponent names (minimal rows returned) ---
+    def _fetch_name(subquery, params):
+        r = execute_query_one(subquery, params)
+        return r['opp_name'] if r else None
 
-    high_game = None
-    high_game_opp = None
-    low_game = None
-    low_game_opp = None
+    high_game_opp = _fetch_name(
+        """SELECT opp_p.name as opp_name
+        FROM player_results pr
+        JOIN games g ON pr.game_id = g.id
+        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
+        JOIN players opp_p ON opp_pr.player_id = opp_p.id
+        WHERE pr.player_id = %s AND pr.score > 0
+        ORDER BY pr.score DESC LIMIT 1""",
+        (player_id,),
+    )
 
-    biggest_win_margin = None
-    biggest_win_opp = None
-    high_loss_score = None
-    high_loss_opp = None
-    low_win_score = None
-    low_win_opp = None
+    low_game_opp = _fetch_name(
+        """SELECT opp_p.name as opp_name
+        FROM player_results pr
+        JOIN games g ON pr.game_id = g.id
+        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
+        JOIN players opp_p ON opp_pr.player_id = opp_p.id
+        WHERE pr.player_id = %s AND pr.score > 0
+        ORDER BY pr.score ASC LIMIT 1""",
+        (player_id,),
+    )
 
-    buckets = {
-        'under300': 0,
-        '300to399': 0,
-        '400to499': 0,
-        '500to599': 0,
-        '600plus': 0,
-    }
+    biggest_win_opp = _fetch_name(
+        """SELECT opp_p.name as opp_name
+        FROM player_results pr
+        JOIN games g ON pr.game_id = g.id
+        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
+        JOIN players opp_p ON opp_pr.player_id = opp_p.id
+        WHERE pr.player_id = %s AND pr.result = 1 AND pr.score > 0
+        ORDER BY (pr.score - opp_pr.score) DESC LIMIT 1""",
+        (player_id,),
+    )
 
-    for row in rows:
-        score = row['score']
-        opp_score = row['opp_score']
-        result = row['result']
-        opp_name = row['opp_name']
+    high_loss_opp = _fetch_name(
+        """SELECT opp_p.name as opp_name
+        FROM player_results pr
+        JOIN games g ON pr.game_id = g.id
+        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
+        JOIN players opp_p ON opp_pr.player_id = opp_p.id
+        WHERE pr.player_id = %s AND pr.result = -1 AND pr.score > 0
+        ORDER BY pr.score DESC LIMIT 1""",
+        (player_id,),
+    )
 
-        # Skip byes (score == 0 already filtered above, but double-check)
-        if score is None or score == 0:
-            continue
+    low_win_opp = _fetch_name(
+        """SELECT opp_p.name as opp_name
+        FROM player_results pr
+        JOIN games g ON pr.game_id = g.id
+        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
+        JOIN players opp_p ON opp_pr.player_id = opp_p.id
+        WHERE pr.player_id = %s AND pr.result = 1 AND pr.score > 0
+        ORDER BY pr.score ASC LIMIT 1""",
+        (player_id,),
+    )
 
-        total_games += 1
-        total_score += score
-        total_against += opp_score
-
-        if result == 1:
-            wins += 1
-        elif result == -1:
-            losses += 1
-        elif result == 0:
-            draws += 1
-
-        # High / low game
-        if high_game is None or score > high_game:
-            high_game = score
-            high_game_opp = opp_name
-        if low_game is None or score < low_game:
-            low_game = score
-            low_game_opp = opp_name
-
-        # Biggest win margin
-        if result == 1:
-            margin = score - opp_score
-            if biggest_win_margin is None or margin > biggest_win_margin:
-                biggest_win_margin = margin
-                biggest_win_opp = opp_name
-
-            # Lowest winning score
-            if low_win_score is None or score < low_win_score:
-                low_win_score = score
-                low_win_opp = opp_name
-
-        # Highest losing score
-        if result == -1:
-            if high_loss_score is None or score > high_loss_score:
-                high_loss_score = score
-                high_loss_opp = opp_name
-
-        # Scoring buckets
-        if score < 300:
-            buckets['under300'] += 1
-        elif score < 400:
-            buckets['300to399'] += 1
-        elif score < 500:
-            buckets['400to499'] += 1
-        elif score < 600:
-            buckets['500to599'] += 1
-        else:
-            buckets['600plus'] += 1
-
-    win_pct = (wins / (wins + losses + draws) * 100) if (wins + losses + draws) > 0 else 0.0
-    avg_score = total_score / total_games if total_games > 0 else 0.0
-    avg_against = total_against / total_games if total_games > 0 else 0.0
-
-    # Fetch bye count separately
     bye_count = _get_bye_count(player_id)
+
+    total_games = row['total_games']
+    wins = row['wins']
+    losses = row['losses']
+    draws = row['draws']
+    win_pct = (wins / (wins + losses + draws) * 100) if (wins + losses + draws) > 0 else 0.0
 
     return {
         'gamesPlayed': total_games,
@@ -164,24 +142,24 @@ def get_player_stats_v2(player_id: int) -> Optional[Dict[str, Any]]:
         'losses': losses,
         'draws': draws,
         'byes': bye_count,
-        'winPercentage': win_pct,
-        'averageScore': avg_score,
-        'averageAgainst': avg_against,
-        'highGame': high_game,
+        'winPercentage': round(win_pct, 2),
+        'averageScore': row['average_score'],
+        'averageAgainst': row['average_against'],
+        'highGame': row['high_game'],
         'highGameOpponent': high_game_opp,
-        'lowGame': low_game,
+        'lowGame': row['low_game'],
         'lowGameOpponent': low_game_opp,
-        'biggestWin': biggest_win_margin,
+        'biggestWin': row['biggest_win_margin'],
         'biggestWinOpponent': biggest_win_opp,
-        'highLoss': high_loss_score,
+        'highLoss': row['high_loss_score'],
         'highLossOpponent': high_loss_opp,
-        'lowWin': low_win_score,
+        'lowWin': row['low_win_score'],
         'lowWinOpponent': low_win_opp,
-        'gamesUnder300': buckets['under300'],
-        'games300to399': buckets['300to399'],
-        'games400to499': buckets['400to499'],
-        'games500to599': buckets['500to599'],
-        'games600plus': buckets['600plus'],
+        'gamesUnder300': row['under300'],
+        'games300to399': row['score300to399'],
+        'games400to499': row['score400to499'],
+        'games500to599': row['score500to599'],
+        'games600plus': row['score600plus'],
     }
 
 
