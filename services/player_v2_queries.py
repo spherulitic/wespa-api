@@ -34,8 +34,8 @@ def get_basic_player_v2(player_id: int) -> Optional[Dict[str, Any]]:
 def get_player_stats_v2(player_id: int) -> Optional[Dict[str, Any]]:
     """Compute detailed career stats for a player.
 
-    All aggregation happens in SQL — only the aggregated row and a few
-    focused lookups are transferred from the database.
+    All aggregation happens in a single SQL query, plus one extra query
+    for the five opponent names (instead of five separate lookups).
     """
     # --- Single aggregation query ---
     query = """
@@ -68,65 +68,22 @@ def get_player_stats_v2(player_id: int) -> Optional[Dict[str, Any]]:
     if not row or not row['total_games']:
         return None
 
-    # --- Focused lookups for opponent names (minimal rows returned) ---
-    def _fetch_name(subquery, params):
-        r = execute_query_one(subquery, params)
-        return r['opp_name'] if r else None
-
-    high_game_opp = _fetch_name(
-        """SELECT opp_p.name as opp_name
+    # --- Single query for all five opponent names ---
+    # Uses GROUP_CONCAT with ordering to pick the first match per category.
+    opp_query = """
+        SELECT
+            SUBSTRING_INDEX(GROUP_CONCAT(opp_p.name ORDER BY pr.score DESC), ',', 1) as high_game_opp,
+            SUBSTRING_INDEX(GROUP_CONCAT(opp_p.name ORDER BY pr.score ASC), ',', 1) as low_game_opp,
+            SUBSTRING_INDEX(GROUP_CONCAT(opp_p.name ORDER BY (pr.score - opp_pr.score) DESC), ',', 1) as biggest_win_opp,
+            SUBSTRING_INDEX(GROUP_CONCAT(CASE WHEN pr.result = -1 THEN opp_p.name END ORDER BY pr.score DESC), ',', 1) as high_loss_opp,
+            SUBSTRING_INDEX(GROUP_CONCAT(CASE WHEN pr.result = 1 THEN opp_p.name END ORDER BY pr.score ASC), ',', 1) as low_win_opp
         FROM player_results pr
         JOIN games g ON pr.game_id = g.id
         JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
         JOIN players opp_p ON opp_pr.player_id = opp_p.id
         WHERE pr.player_id = %s AND pr.score > 0
-        ORDER BY pr.score DESC LIMIT 1""",
-        (player_id,),
-    )
-
-    low_game_opp = _fetch_name(
-        """SELECT opp_p.name as opp_name
-        FROM player_results pr
-        JOIN games g ON pr.game_id = g.id
-        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
-        JOIN players opp_p ON opp_pr.player_id = opp_p.id
-        WHERE pr.player_id = %s AND pr.score > 0
-        ORDER BY pr.score ASC LIMIT 1""",
-        (player_id,),
-    )
-
-    biggest_win_opp = _fetch_name(
-        """SELECT opp_p.name as opp_name
-        FROM player_results pr
-        JOIN games g ON pr.game_id = g.id
-        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
-        JOIN players opp_p ON opp_pr.player_id = opp_p.id
-        WHERE pr.player_id = %s AND pr.result = 1 AND pr.score > 0
-        ORDER BY (pr.score - opp_pr.score) DESC LIMIT 1""",
-        (player_id,),
-    )
-
-    high_loss_opp = _fetch_name(
-        """SELECT opp_p.name as opp_name
-        FROM player_results pr
-        JOIN games g ON pr.game_id = g.id
-        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
-        JOIN players opp_p ON opp_pr.player_id = opp_p.id
-        WHERE pr.player_id = %s AND pr.result = -1 AND pr.score > 0
-        ORDER BY pr.score DESC LIMIT 1""",
-        (player_id,),
-    )
-
-    low_win_opp = _fetch_name(
-        """SELECT opp_p.name as opp_name
-        FROM player_results pr
-        JOIN games g ON pr.game_id = g.id
-        JOIN player_results opp_pr ON opp_pr.game_id = g.id AND opp_pr.player_id != pr.player_id
-        JOIN players opp_p ON opp_pr.player_id = opp_p.id
-        WHERE pr.player_id = %s AND pr.result = 1 AND pr.score > 0
-        ORDER BY pr.score ASC LIMIT 1""",
-        (player_id,),
-    )
+    """
+    opp_row = execute_query_one(opp_query, (player_id,))
 
     bye_count = _get_bye_count(player_id)
 
@@ -146,15 +103,15 @@ def get_player_stats_v2(player_id: int) -> Optional[Dict[str, Any]]:
         'averageScore': row['average_score'],
         'averageAgainst': row['average_against'],
         'highGame': row['high_game'],
-        'highGameOpponent': high_game_opp,
+        'highGameOpponent': opp_row['high_game_opp'] if opp_row else None,
         'lowGame': row['low_game'],
-        'lowGameOpponent': low_game_opp,
+        'lowGameOpponent': opp_row['low_game_opp'] if opp_row else None,
         'biggestWin': row['biggest_win_margin'],
-        'biggestWinOpponent': biggest_win_opp,
+        'biggestWinOpponent': opp_row['biggest_win_opp'] if opp_row else None,
         'highLoss': row['high_loss_score'],
-        'highLossOpponent': high_loss_opp,
+        'highLossOpponent': opp_row['high_loss_opp'] if opp_row else None,
         'lowWin': row['low_win_score'],
-        'lowWinOpponent': low_win_opp,
+        'lowWinOpponent': opp_row['low_win_opp'] if opp_row else None,
         'gamesUnder300': row['under300'],
         'games300to399': row['score300to399'],
         'games400to499': row['score400to499'],
@@ -177,9 +134,28 @@ def _get_bye_count(player_id: int) -> int:
 
 
 def get_tournament_list_v2(player_id: int) -> List[Dict[str, Any]]:
-    """Get tournament history for a player (v2 format)."""
-    # Main query — tournament-level data
+    """Get tournament history for a player (v2 format), including per-tournament
+    average score/against, all in a single query.
+
+    Uses a CTE to compute per-tournament averages and joins them to the
+    main tournament list, avoiding a separate round-trip.
+    """
     query = """
+        WITH tourney_avgs AS (
+            SELECT
+                d.tournament_id as tourneyid,
+                AVG(pr.score) as average_score,
+                AVG(opp_pr.score) as average_against
+            FROM player_results pr
+            JOIN player_results opp_pr
+                ON opp_pr.game_id = pr.game_id
+               AND opp_pr.player_id != pr.player_id
+            JOIN games g ON pr.game_id = g.id
+            JOIN divisions d ON g.division_id = d.id
+            WHERE pr.player_id = %s
+              AND pr.score > 0
+            GROUP BY d.tournament_id
+        )
         SELECT
             t.id as tourneyid,
             tr.tournament_name as name,
@@ -193,48 +169,17 @@ def get_tournament_list_v2(player_id: int) -> List[Dict[str, Any]]:
             tr.end_rating as end_rating,
             (COALESCE(tr.end_rating, 0) - COALESCE(tr.start_rating, 0)) as rating_change,
             tr.old_rating_dev as start_deviation,
-            tr.new_rating_dev as end_deviation
+            tr.new_rating_dev as end_deviation,
+            COALESCE(ta.average_score, 0) as average_score,
+            COALESCE(ta.average_against, 0) as average_against
         FROM tournament_results tr
         JOIN divisions d ON tr.division_id = d.id
         JOIN tournaments t ON d.tournament_id = t.id
+        LEFT JOIN tourney_avgs ta ON ta.tourneyid = t.id
         WHERE tr.player_id = %s
         ORDER BY tr.date DESC
     """
-    rows = execute_query(query, (player_id,))
-    if not rows:
-        return rows
-
-    # Single aggregation query — average scores for all tournaments at once
-    avg_query = """
-        SELECT
-            d.tournament_id as tourneyid,
-            AVG(pr.score) as average_score,
-            AVG(opp_pr.score) as average_against
-        FROM player_results pr
-        JOIN player_results opp_pr
-            ON opp_pr.game_id = pr.game_id
-           AND opp_pr.player_id != pr.player_id
-        JOIN games g ON pr.game_id = g.id
-        JOIN divisions d ON g.division_id = d.id
-        WHERE pr.player_id = %s
-          AND pr.score > 0
-        GROUP BY d.tournament_id
-    """
-    avg_rows = execute_query(avg_query, (player_id,))
-
-    # Build a lookup dict: tourneyid -> (average_score, average_against)
-    avg_lookup = {
-        r['tourneyid']: (r['average_score'] or 0, r['average_against'] or 0)
-        for r in avg_rows
-    }
-
-    # Merge averages into main results
-    for row in rows:
-        avg_score, avg_against = avg_lookup.get(row['tourneyid'], (0, 0))
-        row['average_score'] = avg_score
-        row['average_against'] = avg_against
-
-    return rows
+    return execute_query(query, (player_id, player_id))
 
 
 def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, Any]]:
