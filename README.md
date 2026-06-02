@@ -197,6 +197,7 @@ Returns tournament-level info along with all divisions and their full standings.
   "name": "UK Open - Final Fling",
   "date": "2026-01-10",
   "location": "Birmingham, England",
+  "total_players": 45,
   "divisions": [
     {
       "division": 1,

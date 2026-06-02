@@ -50,6 +50,11 @@ def get_tournament(tourney_id: int):
             div.standings = [DivisionStandingV2(s) for s in standings]
             response.divisions.append(div)
 
+        # Count total players across all divisions
+        response.total_players = sum(
+            len(div.standings) for div in response.divisions
+        )
+
         return jsonify(response.to_dict())
 
     except Exception as e:
