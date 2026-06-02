@@ -370,6 +370,7 @@ class TournamentResponseV2:
         self.name = data.get('name')
         self.date = data.get('date')
         self.location = data.get('location')
+        self.total_players = 0
         self.divisions: List[DivisionV2] = []
 
     def to_dict(self) -> Dict[str, Any]:
@@ -378,6 +379,7 @@ class TournamentResponseV2:
             'name': self.name,
             'date': self.date.strftime('%Y-%m-%d') if self.date else None,
             'location': self.location,
+            'total_players': self.total_players,
             'divisions': [d.to_dict() for d in self.divisions],
         }
 
