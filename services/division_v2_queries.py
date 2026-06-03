@@ -175,7 +175,7 @@ def compute_division_stats(division_id: int, top_n: int = 10) -> Dict[str, List[
 def get_division_ratings(division_id: int) -> List[Dict[str, Any]]:
     """Get rating/rank info for every player in a division, ordered by position.
 
-    actualWins = wins + (byes as draws counted as 0.5)
+    actualWins = wins (byes are not included as they are not played games)
     ratingChange = endRating - startRating
     """
     query = """
@@ -184,7 +184,7 @@ def get_division_ratings(division_id: int) -> List[Dict[str, Any]]:
             p.name,
             p.country,
             tr.expected_wins as expected_wins,
-            (COALESCE(tr.wins, 0) + (COALESCE(tr.byes, 0) * 0.5)) as actual_wins,
+            (COALESCE(tr.wins, 0)) as actual_wins,
             tr.old_world_rank as old_world_rank,
             tr.new_world_rank as new_world_rank,
             tr.old_national_rank as old_nation_rank,

@@ -235,12 +235,23 @@ Returns rating and rank information for all players in a specific division of a 
     {
       "playerid": 3039,
       "name": "Zachary Dang",
-      "rating": 1764,
-      "rank": 1
+      "startRating": 1764,
+      "endRating": 1791,
+      "ratingChange": 27,
+      "expWins": 8.5,
+      "actWins": 12,
+      "oldWorldRank": 1,
+      "newWorldRank": 1,
+      "oldNationRank": 1,
+      "newNationRank": 1,
+      "startDeviation": 67,
+      "endDeviation": 42
     }
   ]
 }
 ```
+
+- `actWins` is the raw win count from the standings (byes are not counted as wins).
 
 #### Division Stats
 
