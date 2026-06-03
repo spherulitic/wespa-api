@@ -217,7 +217,7 @@ def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, 
             g.round,
             opp_p.name as opponent_name,
             opp_pr.player_id as opponent_id,
-            opp_p.rating as opponent_rating,
+            opp_tr.start_rating as opponent_rating,
             pr.score as score_for,
             opp_pr.score as score_against,
             CASE
@@ -235,6 +235,9 @@ def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, 
             ON opp_pr.game_id = g.id
            AND opp_pr.player_id != pr.player_id
         JOIN players opp_p ON opp_pr.player_id = opp_p.id
+        JOIN tournament_results opp_tr
+            ON opp_tr.player_id = opp_p.id
+           AND opp_tr.division_id = d.id
         WHERE pr.player_id = %s
           AND t.id = %s
         ORDER BY g.round ASC
