@@ -124,6 +124,53 @@ Returns per-round results for a player at a specific tournament.
 - `opponent_rating` in each round is the opponent's **start rating** for the tournament (from `tournament_results.start_rating`), not their current overall rating.
 - Result values: `W` (win), `L` (loss), `D` (draw), `B` (bye).
 
+#### Update Player Nationality
+
+```
+PUT /v2/player/country
+```
+
+Updates the `country` field of one or more players in the database. Requires an API key provided via the `Authorization` header (either as a raw key or `Bearer <key>`). The key is read from the `UPDATE_API_KEY` environment variable.
+
+**Request body** (JSON array):
+
+```json
+[
+  {
+    "player_id": 3039,
+    "trigraph": "USA"
+  },
+  {
+    "player_id": 61,
+    "trigraph": "IRL"
+  }
+]
+```
+
+**Response shape:**
+
+```json
+{
+  "results": [
+    {
+      "index": 0,
+      "player_id": 3039,
+      "trigraph": "USA",
+      "status": "updated"
+    },
+    {
+      "index": 1,
+      "player_id": 61,
+      "trigraph": "IRL",
+      "status": "updated"
+    }
+  ]
+}
+```
+
+- `status` can be `"updated"`, `"player_not_found"`, `"invalid_player_id"`, `"invalid_trigraph"`, `"invalid_entry"`, or `"database_error"`.
+- HTTP 200 if all updates succeeded; HTTP 207 Multi‑Status if any had errors; 401 Unauthorized if the API key is missing or incorrect; 400 Bad Request for invalid JSON.
+
 #### Rankings
 
 ```
@@ -361,6 +408,7 @@ wespa-api/
 | `DB_PASSWORD` | Database password | (empty) |
 | `DB_NAME` | Database name | `wespa` |
 | `RATELIMIT_DEFAULT` | API rate limit | `100 per minute` |
+| `UPDATE_API_KEY` | API key for protected endpoints (update player country) | (none, must be set) |
 
 ### Docker Build
 
