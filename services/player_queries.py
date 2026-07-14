@@ -1,6 +1,6 @@
 import logging
 from typing import List, Optional, Dict, Any
-from services.db import execute_query, execute_query_one
+from services.db import execute_query, execute_query_one, execute_update
 from models.schemas import CrossTablesPlayer, TournamentResult
 
 logger = logging.getLogger(__name__)
@@ -150,3 +150,15 @@ def get_all_players_idsonly(limit: int = None, offset: int = None) -> List[Dict[
             ORDER BY id
         """
         return execute_query(query)
+
+
+def update_player_country(player_id: int, trigraph: str) -> bool:
+    """Update a player's country via UPPERCASE trigraph. Returns True if player exists, else False."""
+    # First check existence
+    check_query = "SELECT id FROM players WHERE id = %s"
+    row = execute_query_one(check_query, (player_id,))
+    if not row:
+        return False
+    update_query = "UPDATE players SET country = %s WHERE id = %s"
+    execute_update(update_query, (trigraph, player_id))
+    return True

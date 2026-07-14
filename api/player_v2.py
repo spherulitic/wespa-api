@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, request, jsonify
 import logging
 
@@ -7,6 +8,7 @@ from services.player_v2_queries import (
     get_tournament_list_v2,
     get_tournament_rounds_v2,
 )
+from services.player_queries import update_player_country
 from models.schemas import (
     PlayerResponseV2,
     PlayerStatsV2,
@@ -83,3 +85,103 @@ def get_player_tournament_detail(player_id: int, tourney_id: int):
             f"tourney {tourney_id}: {e}"
         )
         return jsonify({'error': 'Internal server error'}), 500
+
+
+@bp.route('/v2/player/country', methods=['PUT'])
+def update_player_country_endpoint():
+    """
+    Update player nationality.
+    Accepts JSON body with list of {player_id: int, trigraph: str} pairs.
+    Requires Authorization header with valid API key (from UPDATE_API_KEY env).
+    """
+    # Authenticate
+    api_key = os.environ.get('UPDATE_API_KEY')
+    if not api_key:
+        return jsonify({'error': 'Server misconfiguration: UPDATE_API_KEY not set'}), 500
+
+    auth = request.headers.get('Authorization', '')
+    # Accept raw key or Bearer scheme
+    if auth.startswith('Bearer '):
+        provided_key = auth[len('Bearer '):]
+    else:
+        provided_key = auth
+    if provided_key != api_key:
+        return jsonify({'error': 'Unauthorized: invalid API key'}), 401
+
+    # Parse body
+    try:
+        data = request.get_json(force=True)
+    except Exception:
+        return jsonify({'error': 'Invalid JSON'}), 400
+
+    if not isinstance(data, list):
+        return jsonify({'error': 'Request body must be a JSON array of objects'}), 400
+
+    if not data:
+        return jsonify({'error': 'Empty update list'}), 400
+
+    results = []
+    for idx, entry in enumerate(data):
+        if not isinstance(entry, dict):
+            results.append({
+                'index': idx,
+                'player_id': None,
+                'trigraph': None,
+                'status': 'invalid_entry'
+            })
+            continue
+
+        player_id = entry.get('player_id')
+        trigraph = entry.get('trigraph')
+
+        # Validate player_id
+        if not isinstance(player_id, int) or player_id <= 0:
+            results.append({
+                'index': idx,
+                'player_id': player_id,
+                'trigraph': trigraph,
+                'status': 'invalid_player_id'
+            })
+            continue
+
+        # Validate trigraph (exactly 3 characters, will uppercase)
+        if not isinstance(trigraph, str) or len(trigraph) != 3:
+            results.append({
+                'index': idx,
+                'player_id': player_id,
+                'trigraph': trigraph,
+                'status': 'invalid_trigraph'
+            })
+            continue
+
+        trigraph_clean = trigraph.strip().upper()
+
+        try:
+            success = update_player_country(player_id, trigraph_clean)
+            if success:
+                results.append({
+                    'index': idx,
+                    'player_id': player_id,
+                    'trigraph': trigraph_clean,
+                    'status': 'updated'
+                })
+            else:
+                results.append({
+                    'index': idx,
+                    'player_id': player_id,
+                    'trigraph': trigraph_clean,
+                    'status': 'player_not_found'
+                })
+        except Exception as e:
+            logger.error(f"Database error updating player {player_id}: {e}")
+            results.append({
+                'index': idx,
+                'player_id': player_id,
+                'trigraph': trigraph_clean,
+                'status': 'database_error'
+            })
+
+    # Determine overall HTTP status
+    all_ok = all(r['status'] == 'updated' for r in results)
+    status_code = 200 if all_ok else 207
+    return jsonify({'results': results}), status_code
