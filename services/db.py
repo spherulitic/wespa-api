@@ -48,3 +48,11 @@ def execute_query_one(query, params=None):
         with conn.cursor() as cursor:
             cursor.execute(query, params or ())
             return cursor.fetchone()
+
+
+def execute_update(query, params=None):
+    """Execute an UPDATE/INSERT/DELETE query and return number of rows affected"""
+    with db_pool.get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params or ())
+            return cursor.rowcount
