@@ -7,6 +7,8 @@ from services.player_v2_queries import (
     get_player_stats_v2,
     get_tournament_list_v2,
     get_tournament_rounds_v2,
+    get_peak_rating_last_two_years,
+    get_peak_rating_all_time,
 )
 from services.player_queries import update_player_country
 from models.schemas import (
