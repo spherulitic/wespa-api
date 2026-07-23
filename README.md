@@ -122,7 +122,7 @@ Returns per-round results for a player at a specific tournament.
 ```
 
 - `cswrating` is the player's `end_rating` from their most recent tournament, or falls back to the `players.rating` column if no tournaments exist.
-- `peakRatingLastTwoYears` is the highest `end_rating` achieved in any tournament ending within the last 2 years (based on `tournaments.end_date`). `peakRatingAllTime` is the highest `end_rating` across all tournaments. Both return `null` if the player has no tournament results.
+- `peakRatingLastTwoYears` is the highest `end_rating` achieved in any tournament ending within the last 2 years. `peakRatingAllTime` is the highest `end_rating` across all tournaments. Both exclude tournaments where the player was still provisional (fewer than 50 career games at the time of that tournament). Both return `null` if the player has no tournament results.
 - `endRating` / `ratingChange` / `startDeviation` / `endDeviation` in each tournament entry reflect the rating and rating deviation at the end of that tournament.
 - `opponent_rating` in each round is the opponent's **start rating** for the tournament (from `tournament_results.start_rating`), not their current overall rating.
 - Result values: `W` (win), `L` (loss), `D` (draw), `B` (bye).

@@ -258,27 +258,62 @@ def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, 
 
 
 def get_peak_rating_last_two_years(player_id: int) -> Optional[int]:
-    """Get the highest end_rating from tournaments in the last 2 years."""
+    """Get the highest end_rating from tournaments in the last 2 years,
+    excluding provisional tournaments (cumulative games < 50 at end of tournament)."""
     query = """
-        SELECT MAX(tr.end_rating) as peak_rating
-        FROM tournament_results tr
-        JOIN divisions d ON tr.division_id = d.id
-        JOIN tournaments t ON d.tournament_id = t.id
-        WHERE tr.player_id = %s
-          AND tr.end_rating IS NOT NULL
-          AND t.end_date >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
+        WITH player_tournaments AS (
+            SELECT
+                tr.id,
+                tr.end_rating,
+                tr.date,
+                (COALESCE(tr.wins,0) + COALESCE(tr.losses,0) + COALESCE(tr.byes,0)) AS games_in_tournament
+            FROM tournament_results tr
+            WHERE tr.player_id = %s
+            ORDER BY tr.date ASC
+        ),
+        cumulative AS (
+            SELECT
+                id,
+                end_rating,
+                date,
+                SUM(games_in_tournament) OVER (ORDER BY date ASC) AS cum_games
+            FROM player_tournaments
+        )
+        SELECT MAX(end_rating) AS peak_rating
+        FROM cumulative
+        WHERE end_rating IS NOT NULL
+          AND cum_games >= 50
+          AND date >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
     """
     row = execute_query_one(query, (player_id,))
     return row['peak_rating'] if row else None
 
 
 def get_peak_rating_all_time(player_id: int) -> Optional[int]:
-    """Get the highest end_rating from all tournaments."""
+    """Get the highest end_rating from all tournaments,
+    excluding provisional tournaments (cumulative games < 50 at end of tournament)."""
     query = """
-        SELECT MAX(tr.end_rating) as peak_rating
-        FROM tournament_results tr
-        WHERE tr.player_id = %s
-          AND tr.end_rating IS NOT NULL
+        WITH player_tournaments AS (
+            SELECT
+                tr.id,
+                tr.end_rating,
+                tr.date,
+                (COALESCE(tr.wins,0) + COALESCE(tr.losses,0) + COALESCE(tr.byes,0)) AS games_in_tournament
+            FROM tournament_results tr
+            WHERE tr.player_id = %s
+            ORDER BY tr.date ASC
+        ),
+        cumulative AS (
+            SELECT
+                id,
+                end_rating,
+                SUM(games_in_tournament) OVER (ORDER BY date ASC) AS cum_games
+            FROM player_tournaments
+        )
+        SELECT MAX(end_rating) AS peak_rating
+        FROM cumulative
+        WHERE end_rating IS NOT NULL
+          AND cum_games >= 50
     """
     row = execute_query_one(query, (player_id,))
     return row['peak_rating'] if row else None
