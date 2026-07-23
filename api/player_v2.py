@@ -7,6 +7,8 @@ from services.player_v2_queries import (
     get_player_stats_v2,
     get_tournament_list_v2,
     get_tournament_rounds_v2,
+    get_peak_rating_last_two_years,
+    get_peak_rating_all_time,
 )
 from services.player_queries import update_player_country
 from models.schemas import (
@@ -34,6 +36,10 @@ def get_player_v2(player_id: int):
 
         tournament_rows = get_tournament_list_v2(player_id)
 
+        # Fetch peak ratings
+        peak_2yr = get_peak_rating_last_two_years(player_id)
+        peak_all = get_peak_rating_all_time(player_id)
+
         response = PlayerResponseV2({
             'playerid': basic['playerid'],
             'name': basic['name'],
@@ -42,6 +48,8 @@ def get_player_v2(player_id: int):
             'photourl': basic['photourl'],
             'title': basic.get('title'),
             'norms': basic.get('norms'),
+            'peakRatingLastTwoYears': peak_2yr,
+            'peakRatingAllTime': peak_all,
         })
         response.stats = stats
         response.tournaments = [TournamentListItemV2(r) for r in tournament_rows]

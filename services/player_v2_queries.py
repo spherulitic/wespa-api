@@ -255,3 +255,30 @@ def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, 
         row.update(base)
 
     return rows
+
+
+def get_peak_rating_last_two_years(player_id: int) -> Optional[int]:
+    """Get the highest end_rating from tournaments in the last 2 years."""
+    query = """
+        SELECT MAX(tr.end_rating) as peak_rating
+        FROM tournament_results tr
+        JOIN divisions d ON tr.division_id = d.id
+        JOIN tournaments t ON d.tournament_id = t.id
+        WHERE tr.player_id = %s
+          AND tr.end_rating IS NOT NULL
+          AND t.end_date >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
+    """
+    row = execute_query_one(query, (player_id,))
+    return row['peak_rating'] if row else None
+
+
+def get_peak_rating_all_time(player_id: int) -> Optional[int]:
+    """Get the highest end_rating from all tournaments."""
+    query = """
+        SELECT MAX(tr.end_rating) as peak_rating
+        FROM tournament_results tr
+        WHERE tr.player_id = %s
+          AND tr.end_rating IS NOT NULL
+    """
+    row = execute_query_one(query, (player_id,))
+    return row['peak_rating'] if row else None

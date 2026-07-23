@@ -289,6 +289,8 @@ class PlayerResponseV2:
         self.photourl = data.get('photourl')
         self.title = data.get('title')
         self.norms = data.get('norms')
+        self.peakRatingLastTwoYears: Optional[int] = data.get('peakRatingLastTwoYears')
+        self.peakRatingAllTime: Optional[int] = data.get('peakRatingAllTime')
         self.stats: Optional[PlayerStatsV2] = None
         self.tournaments: List[TournamentListItemV2] = []
 
@@ -301,6 +303,8 @@ class PlayerResponseV2:
             'photourl': self.photourl,
             'title': self.title,
             'norms': self.norms,
+            'peakRatingLastTwoYears': self.peakRatingLastTwoYears,
+            'peakRatingAllTime': self.peakRatingAllTime,
             'stats': self.stats.to_dict() if self.stats else None,
             'tournaments': [t.to_dict() for t in self.tournaments],
         }
