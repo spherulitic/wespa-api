@@ -135,20 +135,7 @@ def get_rankings_page(
     }
 
 
-def get_latest_tournament() -> Optional[Dict[str, Any]]:
-    """Get the name and end date of the most recent tournament."""
-    query = """
-        SELECT name, end_date AS date
-        FROM tournaments
-        ORDER BY end_date DESC
-        LIMIT 1
-    """
-    row = execute_query_one(query)
-    if not row:
-        return None
-
-    return {
-        'name': row['name'],
-        'date': row['date'].strftime('%Y-%m-%d')
-                if row.get('date') else None,
-    }
+def get_tournament_count() -> Optional[Dict[str, Any]]:
+    """Get the total number of tournaments (used as a cache-busting indicator)."""
+    row = execute_query_one("SELECT COUNT(*) AS total FROM tournaments")
+    return {'total_tournaments': row['total']} if row else None

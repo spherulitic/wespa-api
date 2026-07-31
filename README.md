@@ -215,20 +215,19 @@ Returns a paginated list of active players sorted by rating descending.
 - Rankings are computed using each player's latest `tournament_results.end_rating`, falling back to `players.rating` if no tournament exists.
 - Only players with at least 50 games and activity in the last 2 years are included.
 
-#### Latest Tournament
+#### Tournament Count
 
 ```
-GET /v2/rankings/latest-tournament
+GET /v2/rankings/tournament-count
 ```
 
-Returns the name and end date of the most recent tournament.
+Returns the total number of tournaments in the database. Used as a cache-busting indicator: the frontend compares this value against its locally cached version to decide whether it needs to re-fetch the player list.
 
 **Response shape:**
 
 ```json
 {
-  "name": "Causeway Challenge",
-  "date": "2026-05-25"
+  "total_tournaments": 237
 }
 ```
 

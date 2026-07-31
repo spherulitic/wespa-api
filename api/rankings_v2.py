@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 import logging
 
-from services.rankings_queries import get_rankings_page, get_latest_tournament
+from services.rankings_queries import get_rankings_page, get_tournament_count
 
 logger = logging.getLogger(__name__)
 bp = Blueprint('rankings_v2', __name__)
@@ -41,15 +41,15 @@ def rankings():
         return jsonify({'error': 'Internal server error'}), 500
 
 
-@bp.route('/v2/rankings/latest-tournament')
-def latest_tournament():
-    """Return the name and date of the most recent tournament."""
+@bp.route('/v2/rankings/tournament-count')
+def tournament_count():
+    """Return the total number of tournaments (used as a cache-busting indicator)."""
     try:
-        result = get_latest_tournament()
+        result = get_tournament_count()
         if not result:
             return jsonify({'error': 'No tournaments found'}), 404
         return jsonify(result)
 
     except Exception as e:
-        logger.error(f"Error fetching latest tournament: {e}")
+        logger.error(f"Error fetching tournament count: {e}")
         return jsonify({'error': 'Internal server error'}), 500
