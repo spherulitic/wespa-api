@@ -99,8 +99,9 @@ def search_players(search_term: str, limit: int = 200) -> List[Dict[str, Any]]:
             p.photo as photourl
         FROM players p
         LEFT JOIN player_alt_names pan ON p.id = pan.player_id
-        WHERE LOWER(p.name) LIKE LOWER(%s) 
-           OR LOWER(pan.alt_name) LIKE LOWER(%s)
+        WHERE (LOWER(p.name) LIKE LOWER(%s) 
+           OR LOWER(pan.alt_name) LIKE LOWER(%s))
+          AND COALESCE(p.total_games, 0) > 0
         LIMIT %s
     """
     search_pattern = f"%{search_term}%"
@@ -131,6 +132,7 @@ def get_all_players_idsonly(limit: int = None, offset: int = None) -> List[Dict[
             query = """
                 SELECT id as playerid, name, country, rating as cswrating
                 FROM players
+                WHERE COALESCE(total_games, 0) > 0
                 ORDER BY id
                 LIMIT %s OFFSET %s
             """
@@ -139,6 +141,7 @@ def get_all_players_idsonly(limit: int = None, offset: int = None) -> List[Dict[
             query = """
                 SELECT id as playerid, name, country, rating as cswrating
                 FROM players
+                WHERE COALESCE(total_games, 0) > 0
                 ORDER BY id
                 LIMIT %s
             """
@@ -147,6 +150,7 @@ def get_all_players_idsonly(limit: int = None, offset: int = None) -> List[Dict[
         query = """
             SELECT id as playerid, name, country, rating as cswrating
             FROM players
+            WHERE COALESCE(total_games, 0) > 0
             ORDER BY id
         """
         return execute_query(query)
