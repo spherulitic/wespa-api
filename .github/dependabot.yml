@@ -1,0 +1,52 @@
+version: 2
+updates:
+  # Python dependencies (requirements.txt)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 5
+    versioning-strategy: "increase"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+    groups:
+      # Minor and patch bumps arrive as a single PR per week.
+      python-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Security fixes are grouped so CVEs can be merged quickly.
+      python-security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
+
+  # Base image in Dockerfile (python:3.11-slim)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+    ignore:
+      # Stay on the Python 3.11 base image; major bumps are a separate decision.
+      - dependency-name: "python"
+        update-types:
+          - "version-update:semver-major"
