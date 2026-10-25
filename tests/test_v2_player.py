@@ -107,6 +107,16 @@ def test_v2_player_not_found(client):
     assert response.get_json() == {"error": "Player not found"}
 
 
+def test_v2_player_uses_players_rating_as_source_of_truth(client):
+    response = client.get("/v2/player/105")
+    assert response.status_code == 200
+    body = response.get_json()
+
+    # players.rating is canonical even when a tournament's end_rating differs.
+    assert body["cswrating"] == 1420
+    assert body["tournaments"][0]["endRating"] == 1300
+
+
 def test_v2_player_tournament_rounds(client, world):
     response = client.get("/v2/player/101/tournaments/1003")
     assert response.status_code == 200
@@ -144,6 +154,34 @@ def test_v2_player_tournament_rounds_not_found(client):
 def test_v2_player_query_count_is_characterised(client, query_count):
     response = client.get("/v2/player/101")
     assert response.status_code == 200
-    # Current shape: profile + stats + opponents + byes + tournaments + 2 peaks.
-    # This should be tightened when the duplicate peak queries are removed.
-    assert query_count["queries"] == 7
+    # profile + stats + opponents + byes + tournaments. Peak ratings are
+    # computed from the tournament rows already fetched (no extra queries).
+    assert query_count["queries"] == 5
+
+
+def test_v2_player_response_is_cached(client, query_count):
+    response = client.get("/v2/player/101")
+    assert response.status_code == 200
+    first_body = response.get_json()
+    assert query_count["queries"] == 5
+
+    queries_before_second_request = query_count["queries"]
+    response = client.get("/v2/player/101")
+    assert response.status_code == 200
+    assert response.get_json() == first_body
+    assert query_count["queries"] == queries_before_second_request
+
+
+def test_v2_player_returns_503_when_database_is_unavailable(client, monkeypatch):
+    import pymysql
+    from services import db as db_module
+
+    def unavailable():
+        raise pymysql.err.OperationalError(2003, "database is down")
+
+    monkeypatch.setattr(db_module.db_pool, "get_connection", unavailable)
+    response = client.get("/v2/player/101")
+
+    assert response.status_code == 503
+    assert response.headers["Retry-After"] == "5"
+    assert response.get_json() == {"error": "Service temporarily unavailable"}

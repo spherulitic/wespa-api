@@ -322,6 +322,9 @@ def seed_database(conn) -> Dict[str, Any]:
             )
 
         # The old tournament exists for date filtering/search tests.
+        # The old tournament deliberately has an end_rating different from
+        # players.rating. The API contract is that players.rating is canonical,
+        # so this exercises the fallback/source-of-truth behaviour.
         cur.execute(
             """INSERT INTO tournament_results
                (division_id, player_id, player_name, position, wins, losses, byes,
@@ -329,7 +332,7 @@ def seed_database(conn) -> Dict[str, Any]:
                 expected_wins, old_rating_dev, new_rating_dev)
                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
             (DIVISION_IDS[OLD_TOURNAMENT], 105, s._player_names[105], 1,
-             0, 0, 0, 0, 1400, 1420, old, "Old Tournament", 0.0, 50, 50),
+             0, 0, 0, 0, 1300, 1300, old, "Old Tournament", 0.0, 50, 50),
         )
 
     return seed.build()

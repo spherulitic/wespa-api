@@ -10,10 +10,15 @@ class Config:
     DB_USER = os.getenv('DB_USER', 'root')
     DB_PASSWORD = os.getenv('DB_PASSWORD', '')
     DB_NAME = os.getenv('DB_NAME', 'wespa')
+    DB_CONNECT_TIMEOUT = int(os.getenv('DB_CONNECT_TIMEOUT', 3))
+    DB_READ_TIMEOUT = int(os.getenv('DB_READ_TIMEOUT', 5))
+    DB_WRITE_TIMEOUT = int(os.getenv('DB_WRITE_TIMEOUT', 5))
     
     # Cache
     CACHE_TYPE = os.getenv('CACHE_TYPE', 'SimpleCache')
     CACHE_DEFAULT_TIMEOUT = int(os.getenv('CACHE_DEFAULT_TIMEOUT', 5400))  # 90 minutes
+    CACHE_PLAYER_TIMEOUT = int(os.getenv('CACHE_PLAYER_TIMEOUT', 300))
+    CACHE_RANKINGS_TIMEOUT = int(os.getenv('CACHE_RANKINGS_TIMEOUT', 300))
     
     # Rate Limiting
     RATELIMIT_DEFAULT = os.getenv('RATELIMIT_DEFAULT', '100 per minute')

@@ -63,6 +63,24 @@ def test_update_country_updates_and_reports_validation_errors(client, db):
         cur.execute("UPDATE players SET country = 'USA' WHERE id = 101")
 
 
+def test_update_country_invalidates_cached_player(client, db):
+    first = client.get("/v2/player/101").get_json()
+    assert first["country"] == "USA"
+
+    response = client.put(
+        "/v2/player/country",
+        json=[{"player_id": 101, "trigraph": "CAN"}],
+        headers=_headers(),
+    )
+    assert response.status_code == 200
+
+    updated = client.get("/v2/player/101").get_json()
+    assert updated["country"] == "CAN"
+
+    with db.cursor() as cur:
+        cur.execute("UPDATE players SET country = 'USA' WHERE id = 101")
+
+
 def test_update_country_all_success_returns_200(client, db):
     response = client.put(
         "/v2/player/country",

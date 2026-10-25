@@ -1,16 +1,17 @@
 import os
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, current_app, request, jsonify
 import logging
+from pymysql.err import InterfaceError, OperationalError
 
 from services.player_v2_queries import (
     get_basic_player_v2,
     get_player_stats_v2,
     get_tournament_list_v2,
     get_tournament_rounds_v2,
-    get_peak_rating_last_two_years,
-    get_peak_rating_all_time,
+    compute_peak_ratings,
 )
 from services.player_queries import update_player_country
+from services.cache import get_cache
 from models.schemas import (
     PlayerResponseV2,
     PlayerStatsV2,
@@ -23,10 +24,32 @@ logger = logging.getLogger(__name__)
 bp = Blueprint('player_v2', __name__)
 
 
+def _cache():
+    return get_cache()
+
+
+def _player_cache_key(player_id: int) -> str:
+    return f"v2:player:{player_id}"
+
+
+def _invalidate_player_cache(player_id: int) -> None:
+    cache = _cache()
+    if cache is not None:
+        cache.delete(_player_cache_key(player_id))
+
+
 @bp.route('/v2/player/<int:player_id>')
 def get_player_v2(player_id: int):
     """Get player info with detailed stats and tournament list (v2)."""
     try:
+        cache_key = _player_cache_key(player_id)
+        cache_timeout = current_app.config.get('CACHE_PLAYER_TIMEOUT', 300)
+        cache = _cache()
+        if cache is not None:
+            cached = cache.get(cache_key)
+            if cached is not None:
+                return jsonify(cached)
+
         basic = get_basic_player_v2(player_id)
         if not basic:
             return jsonify({'error': 'Player not found'}), 404
@@ -35,10 +58,7 @@ def get_player_v2(player_id: int):
         stats = PlayerStatsV2(stats_data) if stats_data else PlayerStatsV2({})
 
         tournament_rows = get_tournament_list_v2(player_id)
-
-        # Fetch peak ratings
-        peak_2yr = get_peak_rating_last_two_years(player_id)
-        peak_all = get_peak_rating_all_time(player_id)
+        peak_2yr, peak_all = compute_peak_ratings(tournament_rows)
 
         response = PlayerResponseV2({
             'playerid': basic['playerid'],
@@ -54,8 +74,13 @@ def get_player_v2(player_id: int):
         response.stats = stats
         response.tournaments = [TournamentListItemV2(r) for r in tournament_rows]
 
-        return jsonify(response.to_dict())
+        payload = response.to_dict()
+        if cache is not None:
+            cache.set(cache_key, payload, timeout=cache_timeout)
+        return jsonify(payload)
 
+    except (OperationalError, InterfaceError):
+        raise
     except Exception as e:
         logger.error(f"Error fetching v2 player {player_id}: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -87,6 +112,8 @@ def get_player_tournament_detail(player_id: int, tourney_id: int):
 
         return jsonify(detail.to_dict())
 
+    except (OperationalError, InterfaceError):
+        raise
     except Exception as e:
         logger.error(
             f"Error fetching tournament detail for player {player_id}, "
@@ -167,6 +194,7 @@ def update_player_country_endpoint():
         try:
             success = update_player_country(player_id, trigraph_clean)
             if success:
+                _invalidate_player_cache(player_id)
                 results.append({
                     'index': idx,
                     'player_id': player_id,

@@ -17,7 +17,9 @@ class DatabasePool:
             'charset': 'utf8mb4',
             'cursorclass': pymysql.cursors.DictCursor,
             'autocommit': True,
-            'connect_timeout': 10
+            'connect_timeout': Config.DB_CONNECT_TIMEOUT,
+            'read_timeout': Config.DB_READ_TIMEOUT,
+            'write_timeout': Config.DB_WRITE_TIMEOUT,
         }
     
     @contextmanager

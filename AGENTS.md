@@ -32,7 +32,8 @@ services/db.py                 → pymysql connection pool (execute_query / exec
 - Rankings: only players with ≥50 games and activity in last 2 years.
 
 ## Data quirks
-- `cswrating` = latest `tournament_results.end_rating`, falling back to `players.rating`.
+- `cswrating` = `players.rating`; the tournament loader maintains it from the latest tournament `end_rating`.
+- Same-date tournaments: the loader's choice of the latest rating is currently ambiguous; the API deliberately trusts `players.rating`. Fixing the loader's tie-break is a separate follow-up.
 - `opponent_rating` in rounds = opponent's `start_rating` for that tournament (not current overall rating).
 - `result` values: `W` (win), `L` (loss), `D` (draw), `B` (bye).
 - Bye: `result=0 AND (score IS NULL OR score = 0)`.
