@@ -1,10 +1,13 @@
 import logging
 import json
+import pymysql
 from flask import Flask, jsonify
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import Config
+
+logger = logging.getLogger(__name__)
 
 # Configure JSON logging
 class JSONFormatter(logging.Formatter):
@@ -69,6 +72,18 @@ def index():
 def ratelimit_handler(e):
     """Handle rate limit exceeded"""
     return jsonify({'error': 'Rate limit exceeded. 100 requests per minute allowed.'}), 429
+
+
+@app.errorhandler(pymysql.err.OperationalError)
+@app.errorhandler(pymysql.err.InterfaceError)
+def database_unavailable_handler(e):
+    """Fail fast when the database is overloaded or unreachable."""
+    logger.error(f"Database unavailable: {e}")
+    return (
+        jsonify({'error': 'Service temporarily unavailable'}),
+        503,
+        {'Retry-After': '5'},
+    )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=False)

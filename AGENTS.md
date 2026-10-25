@@ -7,8 +7,11 @@ Flask 3.0 API for Scrabble tournament data. MySQL (PyMySQL). Two API versions: v
 ```bash
 python app.py              # dev server on :8080
 docker build -t wespa-api . && docker run -p 8080:8080 --env-file .env wespa-api
+pytest -q                  # API test suite (requires a MySQL test database, see below)
 ```
-No tests, no linter, no type checker, no pre-commit, no CI configured.
+Tests live in `tests/` and run in GitHub Actions against MySQL 8.0 and 8.4.
+`requirements-dev.txt` contains the test dependencies. The test suite creates and
+seeds a dedicated `wespa_test` database; never point `TEST_DB_*` at production.
 
 ## Architecture
 ```
@@ -29,7 +32,8 @@ services/db.py                 → pymysql connection pool (execute_query / exec
 - Rankings: only players with ≥50 games and activity in last 2 years.
 
 ## Data quirks
-- `cswrating` = latest `tournament_results.end_rating`, falling back to `players.rating`.
+- `cswrating` = `players.rating`; the tournament loader maintains it from the latest tournament `end_rating`.
+- Same-date tournaments: the loader's choice of the latest rating is currently ambiguous; the API deliberately trusts `players.rating`. Fixing the loader's tie-break is a separate follow-up.
 - `opponent_rating` in rounds = opponent's `start_rating` for that tournament (not current overall rating).
 - `result` values: `W` (win), `L` (loss), `D` (draw), `B` (bye).
 - Bye: `result=0 AND (score IS NULL OR score = 0)`.

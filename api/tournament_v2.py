@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 import logging
 import re
+from pymysql.err import InterfaceError, OperationalError
 
 from services.tournament_v2_queries import (
     get_tournament_v2,
@@ -57,6 +58,8 @@ def get_tournament(tourney_id: int):
 
         return jsonify(response.to_dict())
 
+    except (OperationalError, InterfaceError):
+        raise
     except Exception as e:
         logger.error(f"Error fetching tournament {tourney_id}: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -80,6 +83,8 @@ def get_division_ratings_route(tourney_id: int, division_index: int):
 
         return jsonify(response.to_dict())
 
+    except (OperationalError, InterfaceError):
+        raise
     except Exception as e:
         logger.error(
             f"Error fetching division ratings for tournament {tourney_id}, "

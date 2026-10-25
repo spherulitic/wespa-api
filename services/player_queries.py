@@ -13,13 +13,7 @@ def get_basic_player(player_id: int) -> Optional[Dict[str, Any]]:
             p.name,
             p.rating as cswrating,
             p.country,
-            p.photo as photourl,
-            COALESCE(
-                (SELECT rating FROM tournament_results 
-                 WHERE player_id = p.id 
-                 ORDER BY date DESC LIMIT 1),
-                p.rating
-            ) as current_rating
+            p.photo as photourl
         FROM players p
         WHERE p.id = %s
     """

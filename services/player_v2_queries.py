@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 from typing import List, Optional, Dict, Any, Tuple
 from services.db import execute_query, execute_query_one
 
@@ -8,8 +9,9 @@ logger = logging.getLogger(__name__)
 def get_basic_player_v2(player_id: int) -> Optional[Dict[str, Any]]:
     """Get basic player information.
 
-    cswrating is set to the end_rating from the player's most recent
-    tournament, falling back to the players.rating if none exists.
+    ``players.rating`` is maintained by the tournament loader from the latest
+    tournament end rating, so the API treats it as the canonical current rating
+    rather than recomputing it here.
     """
     query = """
         SELECT
@@ -18,12 +20,7 @@ def get_basic_player_v2(player_id: int) -> Optional[Dict[str, Any]]:
             p.country,
             p.title,
             p.norms,
-            COALESCE(
-                (SELECT tr.end_rating FROM tournament_results tr
-                 WHERE tr.player_id = p.id AND tr.end_rating IS NOT NULL
-                 ORDER BY tr.date DESC LIMIT 1),
-                p.rating
-            ) as cswrating,
+            p.rating as cswrating,
             p.photo as photourl
         FROM players p
         WHERE p.id = %s
@@ -257,63 +254,54 @@ def get_tournament_rounds_v2(player_id: int, tourney_id: int) -> List[Dict[str, 
     return rows
 
 
-def get_peak_rating_last_two_years(player_id: int) -> Optional[int]:
-    """Get the highest end_rating from tournaments in the last 2 years,
-    excluding provisional tournaments (cumulative games < 50 at end of tournament)."""
-    query = """
-        WITH player_tournaments AS (
-            SELECT
-                tr.id,
-                tr.end_rating,
-                tr.date,
-                (COALESCE(tr.wins,0) + COALESCE(tr.losses,0) + COALESCE(tr.byes,0)) AS games_in_tournament
-            FROM tournament_results tr
-            WHERE tr.player_id = %s
-            ORDER BY tr.date ASC
-        ),
-        cumulative AS (
-            SELECT
-                id,
-                end_rating,
-                date,
-                SUM(games_in_tournament) OVER (ORDER BY date ASC) AS cum_games
-            FROM player_tournaments
-        )
-        SELECT MAX(end_rating) AS peak_rating
-        FROM cumulative
-        WHERE end_rating IS NOT NULL
-          AND cum_games >= 50
-          AND date >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
-    """
-    row = execute_query_one(query, (player_id,))
-    return row['peak_rating'] if row else None
+def compute_peak_ratings(
+    tournaments: List[Dict[str, Any]],
+    today: Optional[date] = None,
+) -> Tuple[Optional[int], Optional[int]]:
+    """Compute peak post-tournament ratings from an already-fetched history.
 
+    A tournament only counts once the player has reached 50 cumulative games;
+    tournaments before that are provisional. Returns
+    ``(peak_last_two_years, peak_all_time)``.
 
-def get_peak_rating_all_time(player_id: int) -> Optional[int]:
-    """Get the highest end_rating from all tournaments,
-    excluding provisional tournaments (cumulative games < 50 at end of tournament)."""
-    query = """
-        WITH player_tournaments AS (
-            SELECT
-                tr.id,
-                tr.end_rating,
-                tr.date,
-                (COALESCE(tr.wins,0) + COALESCE(tr.losses,0) + COALESCE(tr.byes,0)) AS games_in_tournament
-            FROM tournament_results tr
-            WHERE tr.player_id = %s
-            ORDER BY tr.date ASC
-        ),
-        cumulative AS (
-            SELECT
-                id,
-                end_rating,
-                SUM(games_in_tournament) OVER (ORDER BY date ASC) AS cum_games
-            FROM player_tournaments
-        )
-        SELECT MAX(end_rating) AS peak_rating
-        FROM cumulative
-        WHERE end_rating IS NOT NULL
-          AND cum_games >= 50
+    The tournament list is ordered by date ascending, with the tournament id as
+    a deterministic tie-break for tournaments that share a date.
     """
-    row = execute_query_one(query, (player_id,))
-    return row['peak_rating'] if row else None
+    if not tournaments:
+        return None, None
+
+    today = today or date.today()
+    try:
+        cutoff = today.replace(year=today.year - 2)
+    except ValueError:
+        # 29 February -> use 28 February in the comparison year.
+        cutoff = today.replace(year=today.year - 2, day=28)
+
+    ordered = sorted(
+        tournaments,
+        key=lambda row: (row.get("date") or date.min, row.get("tourneyid") or 0),
+    )
+
+    cumulative_games = 0
+    peak_last_two_years = None
+    peak_all_time = None
+
+    for row in ordered:
+        games = (
+            (row.get("wins") or 0)
+            + (row.get("losses") or 0)
+            + (row.get("draws") or 0)
+        )
+        cumulative_games += games
+
+        end_rating = row.get("end_rating")
+        if cumulative_games < 50 or end_rating is None:
+            continue
+
+        if peak_all_time is None or end_rating > peak_all_time:
+            peak_all_time = end_rating
+        if row.get("date") is not None and row["date"] >= cutoff:
+            if peak_last_two_years is None or end_rating > peak_last_two_years:
+                peak_last_two_years = end_rating
+
+    return peak_last_two_years, peak_all_time

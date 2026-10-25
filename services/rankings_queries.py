@@ -16,46 +16,28 @@ def get_rankings_page(
     containing them is returned instead of page 1.
     """
     if search:
-        # Find the matching player(s) to determine which page to show
-        # Use the same effective rating logic
+        # Find the matching player(s) to determine which page to show.
         match_query = """
-            SELECT p.id,
-                   COALESCE(
-                       (SELECT tr.end_rating FROM tournament_results tr
-                        WHERE tr.player_id = p.id AND tr.end_rating IS NOT NULL
-                        ORDER BY tr.date DESC LIMIT 1),
-                       p.rating
-                   ) AS rating
+            SELECT p.id, p.rating
             FROM players p
             LEFT JOIN player_alt_names pan ON p.id = pan.player_id
             WHERE LOWER(p.name) LIKE LOWER(%s)
                OR LOWER(pan.alt_name) LIKE LOWER(%s)
-            ORDER BY rating DESC
+            ORDER BY p.rating DESC
             LIMIT 1
         """
         pattern = f"%{search}%"
         match = execute_query_one(match_query, (pattern, pattern))
 
         if match and match.get('rating') is not None:
-            # Count how many active players have a higher rating,
-            # using the same rating logic
+            # Count how many active players have a higher rating.
             count_query = """
                 SELECT COUNT(*) AS higher
-                FROM (
-                    SELECT
-                        p.id,
-                        COALESCE(
-                            (SELECT tr.end_rating FROM tournament_results tr
-                             WHERE tr.player_id = p.id AND tr.end_rating IS NOT NULL
-                             ORDER BY tr.date DESC LIMIT 1),
-                            p.rating
-                        ) AS rating
-                    FROM players p
-                    WHERE p.rating IS NOT NULL
-                      AND COALESCE(p.total_games, 0) >= 50
-                      AND p.last_played >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
-                ) ranked
-                WHERE ranked.rating > %s
+                FROM players p
+                WHERE p.rating IS NOT NULL
+                  AND COALESCE(p.total_games, 0) >= 50
+                  AND p.last_played >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
+                  AND p.rating > %s
             """
             count_result = execute_query_one(count_query, (match['rating'],))
             higher = count_result['higher'] if count_result else 0
@@ -66,48 +48,31 @@ def get_rankings_page(
 
     offset = (page - 1) * per_page
 
-    # Get total count of active rated players (using same rating logic)
+    # Get total count of active rated players.
     total_result = execute_query_one(
-        """SELECT COUNT(*) AS cnt FROM (
-            SELECT
-                p.id,
-                COALESCE(
-                    (SELECT tr.end_rating FROM tournament_results tr
-                     WHERE tr.player_id = p.id AND tr.end_rating IS NOT NULL
-                     ORDER BY tr.date DESC LIMIT 1),
-                    p.rating
-                ) AS effective_rating
-            FROM players p
-            WHERE p.rating IS NOT NULL
-              AND COALESCE(p.total_games, 0) >= 50
-              AND p.last_played >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
-        ) sub
-        WHERE sub.effective_rating IS NOT NULL"""
+        """SELECT COUNT(*) AS cnt
+           FROM players p
+           WHERE p.rating IS NOT NULL
+             AND COALESCE(p.total_games, 0) >= 50
+             AND p.last_played >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)"""
     )
     total = total_result['cnt'] if total_result else 0
     total_pages = max(1, (total + per_page - 1) // per_page)
 
-    # Fetch the page of active players, using the same rating
-    # logic as the v2 player endpoint: latest tournament end_rating,
-    # falling back to players.rating
+    # Fetch the page of active players.
     query = """
         SELECT
             p.id AS playerid,
             p.name,
             p.country,
-            COALESCE(
-                (SELECT tr.end_rating FROM tournament_results tr
-                 WHERE tr.player_id = p.id AND tr.end_rating IS NOT NULL
-                 ORDER BY tr.date DESC LIMIT 1),
-                p.rating
-            ) AS rating,
+            p.rating AS rating,
             COALESCE(p.total_games, 0) AS total_games,
             p.last_played
         FROM players p
         WHERE p.rating IS NOT NULL
           AND COALESCE(p.total_games, 0) >= 50
           AND p.last_played >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
-        ORDER BY rating DESC
+        ORDER BY p.rating DESC
         LIMIT %s OFFSET %s
     """
     rows = execute_query(query, (per_page, offset))

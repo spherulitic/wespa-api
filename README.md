@@ -121,7 +121,7 @@ Returns per-round results for a player at a specific tournament.
 }
 ```
 
-- `cswrating` is the player's `end_rating` from their most recent tournament, or falls back to the `players.rating` column if no tournaments exist.
+- `cswrating` comes from `players.rating`, which the tournament loader maintains from the player's latest tournament `end_rating`.
 - `peakRatingLastTwoYears` is the highest `end_rating` achieved in any tournament ending within the last 2 years. `peakRatingAllTime` is the highest `end_rating` across all tournaments. Both exclude tournaments where the player was still provisional (fewer than 50 career games at the time of that tournament). Both return `null` if the player has no tournament results.
 - `endRating` / `ratingChange` / `startDeviation` / `endDeviation` in each tournament entry reflect the rating and rating deviation at the end of that tournament.
 - `opponent_rating` in each round is the opponent's **start rating** for the tournament (from `tournament_results.start_rating`), not their current overall rating.
@@ -212,7 +212,7 @@ Returns a paginated list of active players sorted by rating descending.
 }
 ```
 
-- Rankings are computed using each player's latest `tournament_results.end_rating`, falling back to `players.rating` if no tournament exists.
+- Rankings are computed from `players.rating`, which the loader maintains from each player's latest tournament `end_rating`.
 - Only players with at least 50 games and activity in the last 2 years are included.
 
 #### Tournament Count
@@ -409,6 +409,14 @@ wespa-api/
 | `DB_USER` | Database user | `root` |
 | `DB_PASSWORD` | Database password | (empty) |
 | `DB_NAME` | Database name | `wespa` |
+| `DB_CONNECT_TIMEOUT` | Database connection timeout (seconds) | `3` |
+| `DB_READ_TIMEOUT` | Database read timeout (seconds) | `5` |
+| `DB_WRITE_TIMEOUT` | Database write timeout (seconds) | `5` |
+| `CACHE_PLAYER_TIMEOUT` | v2 player response cache TTL (seconds) | `300` |
+| `CACHE_RANKINGS_TIMEOUT` | Rankings response cache TTL (seconds) | `300` |
+| `GUNICORN_WORKERS` | Gunicorn worker processes | `1` |
+| `GUNICORN_THREADS` | Gunicorn threads per worker | `8` |
+| `GUNICORN_TIMEOUT` | Gunicorn request timeout (seconds) | `25` |
 | `RATELIMIT_DEFAULT` | API rate limit | `100 per minute` |
 | `UPDATE_API_KEY` | API key for protected endpoints (update player country) | (none, must be set) |
 
@@ -418,3 +426,23 @@ wespa-api/
 docker build -t wespa-api .
 docker run -p 8080:8080 --env-file .env wespa-api
 ```
+
+## Tests
+
+The API test suite uses pytest against a dedicated MySQL database. It creates and
+seeds `wespa_test` and drops it at the start of each run, so do not point it at
+production.
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+
+# Example against a local MySQL 8.0/8.4 instance
+TEST_DB_HOST=127.0.0.1 \
+TEST_DB_PORT=3306 \
+TEST_DB_USER=root \
+TEST_DB_PASSWORD=root \
+TEST_DB_NAME=wespa_test \
+pytest -q
+```
+
+The same suite runs in `.github/workflows/tests.yml` against MySQL 8.0 and 8.4.

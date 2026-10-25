@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 import logging
+from pymysql.err import InterfaceError, OperationalError
 
 from services.tournament_search_queries import search_tournaments
 
@@ -54,6 +55,8 @@ def tournament_search():
 
         return jsonify({'tournaments': tournaments})
 
+    except (OperationalError, InterfaceError):
+        raise
     except Exception as e:
         logger.error(f"Error searching tournaments: {e}")
         return jsonify({'error': 'Internal server error'}), 500
