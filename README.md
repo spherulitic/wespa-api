@@ -418,3 +418,23 @@ wespa-api/
 docker build -t wespa-api .
 docker run -p 8080:8080 --env-file .env wespa-api
 ```
+
+## Tests
+
+The API test suite uses pytest against a dedicated MySQL database. It creates and
+seeds `wespa_test` and drops it at the start of each run, so do not point it at
+production.
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+
+# Example against a local MySQL 8.0/8.4 instance
+TEST_DB_HOST=127.0.0.1 \
+TEST_DB_PORT=3306 \
+TEST_DB_USER=root \
+TEST_DB_PASSWORD=root \
+TEST_DB_NAME=wespa_test \
+pytest -q
+```
+
+The same suite runs in `.github/workflows/tests.yml` against MySQL 8.0 and 8.4.

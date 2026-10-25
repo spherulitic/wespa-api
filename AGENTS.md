@@ -7,8 +7,11 @@ Flask 3.0 API for Scrabble tournament data. MySQL (PyMySQL). Two API versions: v
 ```bash
 python app.py              # dev server on :8080
 docker build -t wespa-api . && docker run -p 8080:8080 --env-file .env wespa-api
+pytest -q                  # API test suite (requires a MySQL test database, see below)
 ```
-No tests, no linter, no type checker, no pre-commit, no CI configured.
+Tests live in `tests/` and run in GitHub Actions against MySQL 8.0 and 8.4.
+`requirements-dev.txt` contains the test dependencies. The test suite creates and
+seeds a dedicated `wespa_test` database; never point `TEST_DB_*` at production.
 
 ## Architecture
 ```
