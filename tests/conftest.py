@@ -96,6 +96,12 @@ def app():
 
 @pytest.fixture()
 def client(world, app):
+    from services.cache import get_cache
+
+    with app.app_context():
+        cache = get_cache()
+        if cache is not None:
+            cache.clear()
     return app.test_client()
 
 

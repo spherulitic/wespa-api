@@ -149,3 +149,17 @@ def test_v1_player_query_count(client, query_count):
     assert response.status_code == 200
     # profile, career totals, ranking, tournament history
     assert query_count["queries"] == 4
+
+
+def test_v1_player_returns_503_when_database_is_unavailable(client, monkeypatch):
+    import pymysql
+    from services import db as db_module
+
+    def unavailable():
+        raise pymysql.err.OperationalError(2003, "database is down")
+
+    monkeypatch.setattr(db_module.db_pool, "get_connection", unavailable)
+    response = client.get("/player.php?player=101")
+
+    assert response.status_code == 503
+    assert response.headers["Retry-After"] == "5"

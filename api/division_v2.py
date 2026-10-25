@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 import logging
+from pymysql.err import InterfaceError, OperationalError
 
 from services.tournament_v2_queries import get_tournament_v2
 from services.division_v2_queries import get_division_id, compute_division_stats
@@ -33,6 +34,8 @@ def get_division_stats(tourney_id: int, division_index: int):
 
         return jsonify(response.to_dict())
 
+    except (OperationalError, InterfaceError):
+        raise
     except Exception as e:
         logger.error(
             f"Error fetching division stats for tournament {tourney_id}, "

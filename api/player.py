@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import logging
+from pymysql.err import InterfaceError, OperationalError
 
 from services.player_queries import (
     get_basic_player, 
@@ -75,6 +76,8 @@ def get_player():
         
         return jsonify(player.to_dict(include_results))
     
+    except (OperationalError, InterfaceError):
+        raise
     except Exception as e:
         logger.error(f"Error fetching player {player_id}: {e}")
         return jsonify({'error': 'Internal server error'}), 500

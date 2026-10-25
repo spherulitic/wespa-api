@@ -156,3 +156,16 @@ def test_rankings_query_count(client, query_count):
     assert response.status_code == 200
     # One count query and one page query.
     assert query_count["queries"] == 2
+
+
+def test_rankings_response_is_cached(client, query_count):
+    response = client.get("/v2/rankings?page=1&per_page=2")
+    assert response.status_code == 200
+    first_body = response.get_json()
+    assert query_count["queries"] == 2
+
+    queries_before_second_request = query_count["queries"]
+    response = client.get("/v2/rankings?page=1&per_page=2")
+    assert response.status_code == 200
+    assert response.get_json() == first_body
+    assert query_count["queries"] == queries_before_second_request

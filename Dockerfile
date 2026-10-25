@@ -17,4 +17,4 @@ USER wespa
 EXPOSE 8080
 
 # Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "2", "--timeout", "60", "app:app"]
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "app:app"]

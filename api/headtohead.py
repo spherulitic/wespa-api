@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 import logging
+from pymysql.err import InterfaceError, OperationalError
 import re
 
 from services.headtohead_queries import get_head_to_head_games
@@ -44,6 +45,8 @@ def get_headtohead():
         games = get_head_to_head_games(player_ids)
         return jsonify([game.to_dict() for game in games])
     
+    except (OperationalError, InterfaceError):
+        raise
     except Exception as e:
         logger.error(f"Error fetching head-to-head games for {player_ids}: {e}")
         return jsonify([]), 200
